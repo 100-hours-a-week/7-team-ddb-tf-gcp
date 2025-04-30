@@ -10,7 +10,7 @@ variable "region" {
 }
 
 variable "subnets" {
-  description = "subnet setting"
+  description = "subnet setting. key=name, value={ cidr, type }"
   type        = map(object({
     cidr = string
     type = string # public or private
