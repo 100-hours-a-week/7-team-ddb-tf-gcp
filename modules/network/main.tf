@@ -12,3 +12,9 @@ resource "google_compute_subnetwork" "subnets" {
   region        = var.region
   private_ip_google_access = contains(["private"], each.value.type)
 }
+
+resource "google_compute_router" "router" {
+  name          = "router-${var.env}"
+  region        = var.region
+  network       = google_compute_network.vpc.id
+}
