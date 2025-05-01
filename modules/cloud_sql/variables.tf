@@ -4,7 +4,7 @@ variable "env" {
 }
 
 variable "component" {
-  description = "Component or service name to differentiate multiple DBs per environment"
+  description = "같은 환경의 여러 DB를 구분하기 위한 컴포넌트 (i.e., primary)"
   type        = string
 }
 
@@ -19,39 +19,39 @@ variable "tier" {
 }
 
 variable "vpc_network_id" {
-  description = "VPC network resource ID for private IP connectivity to Cloud SQL"
+  description = "Cloud SQL에 private ip로 연결하기 위한 vpc network resource id"
   type        = string
 }
 
 variable "resource_type" {
-  description = "resource type"
+  description = "resource type, 필터링 용도"
   type        = string
 }
 
 variable "deletion_protection" {
-  description = "Whether to protect the Cloud SQL instance from deletion"
+  description = "Cloud SQL instance 삭제 방지 설정 여부"
   type        = bool
   default     = false
 }
 
 variable "db_user" {
-  description = "Username for the Cloud SQL database"
+  description = "Cloud SQL 사용자 이름"
   type        = string
   sensitive   = true
 }
 
 variable "db_password" {
-  description = "Password for the Cloud SQL database user"
+  description = "Cloud SQL 사용자 비밀번호"
   type        = string
   sensitive   = true
 }
 
 variable "db_name" {
-  description = "Database name to create"
+  description = "생성할 database 이름"
   type        = string
 }
 
 variable "db_user_host" {
-  description = "Host from which the DB user is allowed to connect"
+  description = "사용자가 어느 호스트로부터 database에 접속할 수 있는지 정의"
   type        = string
 }

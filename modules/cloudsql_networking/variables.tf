@@ -1,20 +1,20 @@
 variable "env" {
-  description = "Deployment environment name (e.g. dev, prod)"
+  description = "Deployment environment name"
   type        = string
 }
 
 variable "vpc_self_link" {
-  description = "Self link of the VPC to peer with Cloud SQL"
+  description = "Cloud SQL과 VPC Peering 연결을 구성할 때 필요한 vpc의 self_link 값"
   type        = string
 }
 
 variable "component" {
-  description = "The logical component name (e.g., 'primary', 'replica') to distinguish multiple DBs within the same environment."
+  description = "같은 환경의 여러 DB를 구분하기 위한 컴포넌트 (i.e., primary)"
   type        = string
 }
 
 variable "prefix_length" {
-  description = "The prefix length of the IP range to reserve for VPC peering (e.g., 24 for /24)."
+  description = "VPC Peering을 위해 예약할 IP 주소 범위의 크기 (i.e., 24 (for /24))"
   type        = number
   default     = 24
 }
