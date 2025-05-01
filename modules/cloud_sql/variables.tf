@@ -31,7 +31,7 @@ variable "resource_type" {
 variable "deletion_protection" {
   description = "Whether to protect the Cloud SQL instance from deletion"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "db_user" {

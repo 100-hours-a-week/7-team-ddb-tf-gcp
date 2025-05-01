@@ -25,9 +25,8 @@ resource "google_sql_database" "default" {
 }
 
 resource "google_sql_user" "default" {
-  name     = var.db_user
-  instance = google_sql_database_instance.postgres.id
-  password = var.db_password
-  host     = var.db_user_host
-  depends_on = [google_sql_database.default]
+  name        = var.db_user
+  instance    = google_sql_database_instance.postgres.id
+  password_wo = var.db_password
+  host        = var.db_user_host
 }
