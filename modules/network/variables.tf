@@ -3,12 +3,6 @@ variable "env" {
   type        = string
 }
 
-variable "region" {
-  description = "GCP region"
-  type        = string
-  default     = "asia-northeast3"
-}
-
 variable "subnets" {
   description = "subnet setting. key=name, value={ cidr}"
   type = map(object({
