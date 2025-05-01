@@ -14,7 +14,7 @@ resource "google_compute_subnetwork" "subnets" {
 
 resource "google_compute_route" "public_route" {
   name             = "public-route"
-  network          = google_compute_network.vpc.name
+  network          = google_compute_network.vpc.id
   dest_range       = "0.0.0.0/0"
   next_hop_gateway = "default-internet-gateway"
   priority         = 1000
@@ -23,7 +23,7 @@ resource "google_compute_route" "public_route" {
 
 resource "google_compute_route" "private_route" {
   name              = "private-route"
-  network           = google_compute_network.vpc.name
+  network           = google_compute_network.vpc.id
   dest_range        = "0.0.0.0/0"
   next_hop_instance = var.nat_link
   priority          = 1000
