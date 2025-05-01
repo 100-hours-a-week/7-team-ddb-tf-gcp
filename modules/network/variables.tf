@@ -3,16 +3,25 @@ variable "env" {
   type        = string
 }
 
-variable "region" {
-  description = "GCP region"
-  type        = string
-  default     = "asia-northeast3"
+variable "subnets" {
+  description = "subnet setting. key=name, value={ cidr}"
+  type = map(object({
+    cidr = string
+  }))
 }
 
-variable "subnets" {
-  description = "subnet setting. key=name, value={ cidr, type }"
-  type        = map(object({
-    cidr = string
-    type = string # public or private
-  }))
+
+variable "nat_link" {
+  description = "nat instance의 self_link"
+  type        = string
+}
+
+variable "private_route_tag" {
+  description = "private route tags"
+  type = string
+}
+
+variable "public_route_tag" {
+  description = "public route tags"
+  type = string
 }
