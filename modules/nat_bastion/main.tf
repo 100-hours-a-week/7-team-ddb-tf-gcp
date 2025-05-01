@@ -65,7 +65,7 @@ resource "google_compute_instance" "nat_bastion" {
 
 
     access_config {
-      nat_ip = google_compute_address.nat_bastion_ip.address
+      nat_ip = google_compute_address.nat_bastion.address
     }
   }
 

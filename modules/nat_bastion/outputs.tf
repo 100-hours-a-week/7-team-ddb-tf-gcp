@@ -5,5 +5,5 @@ output "instance_self_link" {
 
 output "nat_ip" {
   description = " NAT_Bastion instance의 ip"
-  value       = google_compute_address.nat_bastion_ip.address
+  value       = google_compute_address.nat_bastion.address
 }
