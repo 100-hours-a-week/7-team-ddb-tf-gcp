@@ -47,7 +47,7 @@ resource "google_compute_instance" "nat_bastion" {
   ]
 
   labels = {
-    Name        = "natbastion-isntance-${var.env}"
+    name        = "natbastion-isntance-${var.env}"
     component   = "natbastion"
     environment = var.env
     managed_by  = "terraform"
