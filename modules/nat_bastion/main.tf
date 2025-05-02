@@ -52,7 +52,7 @@ resource "google_compute_instance" "nat_bastion" {
     environment = var.env
     managed_by  = "terraform"
   }
-  
+
   boot_disk {
     initialize_params {
       image = "ubuntu-2204-jammy-v20250425"
@@ -87,4 +87,25 @@ resource "google_compute_firewall" "bastion_ssh" {
 
   source_ranges = var.allowed_ssh_cidrs
   target_tags   = [local.bastion_tag]
+}
+
+resource "google_compute_firewall" "nat_ingress_from_private" {
+  name      = "nat-allow-from-private-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
+
+  source_tags = ["private"]         # private 인스턴스가 보낸 트래픽만
+  target_tags = [local.bastion_tag] # 이 태그가 붙은 인스턴스만
+
+  allow {
+    protocol = "icmp"
+  } # ping
+  allow {
+    protocol = "udp"
+    ports    = ["53"]
+  } # DNS
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  } # HTTP/HTTPS
 }
