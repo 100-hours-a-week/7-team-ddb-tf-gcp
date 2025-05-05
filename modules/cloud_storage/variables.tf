@@ -24,3 +24,8 @@ variable "env" {
   description = "배포 환경 구분 값 (dev, prod 등)"
   type        = string
 }
+
+variable "backend_service_account_email" {
+  description = "이미지를 업로드할 백엔드 서비스 계정의 이메일 주소"
+  type        = string
+}

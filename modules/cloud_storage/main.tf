@@ -21,3 +21,17 @@ resource "google_storage_bucket" "image_bucket" {
     managed_by  = "terraform"                       
   }
 }
+
+# 이미지 공개 읽기 권한 설정
+resource "google_storage_bucket_iam_member" "public_access" { 
+  bucket = google_storage_bucket.image_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers" 
+}
+
+# 백엔드 서비스 계정에 전체 권한 부여
+resource "google_storage_bucket_iam_member" "backend_full_access" { 
+  bucket = google_storage_bucket.image_bucket.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${var.backend_service_account_email}"
+}
