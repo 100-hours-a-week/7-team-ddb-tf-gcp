@@ -33,11 +33,6 @@ variable "allowed_ssh_cidrs" {
   type        = list(string)
 }
 
-variable "allowed_alb_cidrs" {
-  description = "alb 접근이 허용될 cidr"
-  type        = list(string)
-}
-
 variable "ssh_users" {
   description = "bastion에 접근가능 한 유저 이름"
   type    = list(string)
@@ -49,11 +44,16 @@ variable "ig_port_name" {
 }
 
 variable "be_port" {
-  description = "backend ig 포트 이름"
+  description = "backend ig 포트"
   type = number
 }
 
 variable "be_health_check_path" {
-  description = "backend ig 포트 이름"
+  description = "헬스체크에 사용할 HTTP 경로"
+  type = string
+}
+
+variable "bastion_tag" {
+  description = "bastion tag"
   type = string
 }

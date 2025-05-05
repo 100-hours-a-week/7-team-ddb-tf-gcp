@@ -12,7 +12,7 @@ resource "google_secret_manager_secret" "be_ssh_key" {
 }
 
 resource "google_secret_manager_secret_version" "be_ssh_key_version" {
-  secret      = google_secret_manager_secret.be_ssh_key.id
+  secret         = google_secret_manager_secret.be_ssh_key.id
   secret_data_wo = tls_private_key.be.private_key_pem
 }
 
@@ -45,7 +45,7 @@ resource "google_compute_instance" "be" {
     environment = var.env
     managed_by  = "terraform"
   }
-  
+
   boot_disk {
     initialize_params {
       image = "ubuntu-2204-jammy-v20250425"
@@ -64,26 +64,38 @@ resource "google_compute_instance" "be" {
 }
 
 // be instance의 방화벽
-resource "google_compute_firewall" "be_firewall" {
-  name      = "be-firewall-${var.env}"
+resource "google_compute_firewall" "bastion_to_be" {
+  name      = "bastion-to-be-firewall-${var.env}"
   network   = var.network
   direction = "INGRESS"
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
+  source_tags = [var.bastion_tag]
+  target_tags = [local.be_tag]
+}
+
+// be instance의 방화벽
+resource "google_compute_firewall" "lb_to_be" {
+  name      = "lb-to-be-firewall-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
   allow {
     protocol = "tcp"
-    ports    = ["8080"]
+    ports    = [tostring(var.be_port)]
   }
-  source_ranges = var.allowed_ssh_cidrs
+  source_ranges = [
+    "130.211.0.0/22",
+    "35.191.0.0/16",
+  ]
   target_tags   = [local.be_tag]
 }
 
 # BE 인스턴스 묶을 인스턴스 그룹 (Named Port 설정)
 resource "google_compute_instance_group" "be_group" {
-  name      = "be-ig-${var.env}"
-  zone      = var.zone
+  name = "be-ig-${var.env}"
+  zone = var.zone
   instances = [
     google_compute_instance.be.self_link
   ]
