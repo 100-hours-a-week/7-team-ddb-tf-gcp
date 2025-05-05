@@ -1,6 +1,6 @@
 # 이미지 저장용 GCS 버킷 생성
 resource "google_storage_bucket" "image_bucket" {
-  name          = var.bucket_name
+  name          = "${var.bucket_name}-${var.env}"
   location      = var.location
   force_destroy = var.force_destroy
 
@@ -35,3 +35,10 @@ resource "google_storage_bucket_iam_member" "backend_full_access" {
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${var.backend_service_account_email}"
 }
+
+# GCS 버킷을 로드 밸런서에 연결하고 CDN 기능 사용
+resource "google_compute_backend_bucket" "image_backend_bucket" { 
+  name        = "${var.bucket_name}-cdn-backend-${var.env}" 
+  bucket_name = google_storage_bucket.image_bucket.name
+  enable_cdn  = true 
+} 
