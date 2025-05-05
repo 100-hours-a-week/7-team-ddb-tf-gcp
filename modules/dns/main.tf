@@ -23,7 +23,10 @@ resource "google_compute_managed_ssl_certificate" "ssl_cert" {
 
 # Backend Services
 resource "google_compute_backend_service" "svc" {
-  for_each      = var.services
+  for_each = {
+    for k, v in var.services : k => v if k != "cdn"
+  }
+
   name          = "${each.key}-backend-${var.env}"
   protocol      = "HTTP"
   port_name     = each.value.port_name
@@ -34,6 +37,10 @@ resource "google_compute_backend_service" "svc" {
   }
 
   timeout_sec = 10
+}
+
+locals {
+  fallback_service_key = "be"  # 확실히 존재하는 key
 }
 
 # HTTPS용 URL Map (호스트 기반 매칭 + default_service)
@@ -51,13 +58,16 @@ resource "google_compute_url_map" "https_map" {
   dynamic "path_matcher" {
     for_each = var.services
     content {
-      name            = "${each.key}-matcher"
-      default_service = google_compute_backend_service.svc[each.key].self_link
+      name = "${each.key}-matcher"
+      default_service = (
+        each.key == "cdn"
+        ? var.cdn_backend_bucket_self_link
+        : google_compute_backend_service.svc[each.key].self_link
+      )
     }
   }
 
-  # 매칭 실패 시 첫 번째 서비스의 백엔드로
-  default_service = google_compute_backend_service.svc[keys(var.services)[0]].self_link
+  default_service = google_compute_backend_service.svc[local.fallback_service_key].self_link
 }
 
 # HTTPS Proxy & Forwarding (443)
@@ -114,6 +124,5 @@ resource "google_compute_firewall" "lb_to_instances" {
     "130.211.0.0/22",
   ]
   # 각 서비스 모듈이 인스턴스에 붙인 태그(서비스 키)
-  target_tags = [for svc in keys(var.services) : svc]
+  target_tags = [for svc in keys(var.services) : svc if svc != "cdn"]
 }
-

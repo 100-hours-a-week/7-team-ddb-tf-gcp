@@ -27,3 +27,8 @@ variable "services" {
     port_name      = string # module.be.port_name
   }))
 }
+
+variable "cdn_backend_bucket_self_link" {
+  description = "cloud_storage 모듈에서 전달받은 backend_bucket self link (cdn용)"
+  type        = string
+}
