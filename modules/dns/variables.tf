@@ -1,9 +1,29 @@
-variable "name" {
-  description = "Name of the SSL certificate resource"
-  type        = string
+variable "env" {
+  type = string
 }
 
 variable "domains" {
-  description = "SSL certificate인증을 받을 도메인 리스트"
+  description = "도메인 리스트"
   type        = list(string)
+}
+
+variable "dns_managed_zone" {
+  description = "Cloud DNS 관리 영역 이름"
+  type        = string
+}
+
+variable "network" {
+  description = "VPC 네트워크 self_link"
+  type        = string
+}
+
+# services 맵을 아래 구조로 변경
+variable "services" {
+  description = "key : service 태그, value: 서비스별 도메인 및 백엔드 정보"
+  type = map(object({
+    domain         = string # ex: "be.dev.dolpin.site"
+    instance_group = string # module.be.instance_group
+    health_check   = string # module.be.health_check_id
+    port_name      = string # module.be.port_name
+  }))
 }
