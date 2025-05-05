@@ -39,10 +39,6 @@ resource "google_compute_backend_service" "svc" {
   timeout_sec = 10
 }
 
-locals {
-  fallback_service_key = "be"  # 확실히 존재하는 key
-}
-
 # HTTPS용 URL Map (호스트 기반 매칭 + default_service)
 resource "google_compute_url_map" "https_map" {
   name = "https-map-${var.env}"
@@ -67,7 +63,7 @@ resource "google_compute_url_map" "https_map" {
     }
   }
 
-  default_service = google_compute_backend_service.svc[local.fallback_service_key].self_link
+  default_service = google_compute_backend_service.svc[var.fallback_service_key].self_link
 }
 
 # HTTPS Proxy & Forwarding (443)
