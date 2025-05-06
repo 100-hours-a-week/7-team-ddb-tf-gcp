@@ -27,3 +27,18 @@ variable "services" {
     port_name      = string # module.be.port_name
   }))
 }
+
+variable "cdn_backend_bucket_self_link" {
+  description = "cloud_storage 모듈에서 전달받은 backend_bucket self link (cdn용)"
+  type        = string
+}
+
+variable "fallback_service_key" {
+  description = "host 미매칭 시 기본 라우팅 대상 서비스 키"
+  type        = string
+
+  validation {
+    condition     = contains(keys(var.services), var.fallback_service_key)
+    error_message = "fallback_service_key 값은 services 변수 내의 키 중 하나여야 합니다."
+  }
+}
