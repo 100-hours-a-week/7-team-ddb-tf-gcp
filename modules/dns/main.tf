@@ -1,4 +1,3 @@
-# LB용 Global IP
 resource "google_compute_global_address" "lb_ip" {
   name = "lb-ip-${var.env}"
 }
@@ -46,19 +45,19 @@ resource "google_compute_url_map" "https_map" {
   dynamic "host_rule" {
     for_each = var.services
     content {
-      hosts        = [each.value.domain]
-      path_matcher = "${each.key}-matcher"
+      hosts        = [host_rule.value.domain]
+      path_matcher = "${host_rule.key}-matcher"
     }
   }
 
   dynamic "path_matcher" {
     for_each = var.services
     content {
-      name = "${each.key}-matcher"
+      name = "${path_matcher.key}-matcher"
       default_service = (
-        each.key == "cdn"
+        path_matcher.key == "cdn"
         ? var.cdn_backend_bucket_self_link
-        : google_compute_backend_service.svc[each.key].self_link
+        : google_compute_backend_service.svc[path_matcher.key].self_link
       )
     }
   }
