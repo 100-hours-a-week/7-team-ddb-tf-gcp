@@ -50,8 +50,3 @@ variable "db_name" {
   description = "생성할 database 이름"
   type        = string
 }
-
-variable "db_user_host" {
-  description = "사용자가 어느 호스트로부터 database에 접속할 수 있는지 정의"
-  type        = string
-}
