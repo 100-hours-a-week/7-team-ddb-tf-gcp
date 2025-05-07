@@ -20,12 +20,3 @@ resource "google_compute_route" "public_route" {
   priority         = 1000
   tags             = [var.public_route_tag]
 }
-
-resource "google_compute_route" "private_route" {
-  name              = "private-route"
-  network           = google_compute_network.vpc.id
-  dest_range        = "0.0.0.0/0"
-  next_hop_instance = var.nat_link
-  priority          = 1000
-  tags              = [var.private_route_tag]
-}

@@ -23,6 +23,11 @@ variable "machine_type" {
   type        = string
 }
 
+variable "private_route_tag" {
+  description = "NAT완 연결된 tag"
+  type = string
+}
+
 variable "public_route_tag" {
   description = "IG와 연결된 tag"
   type = string

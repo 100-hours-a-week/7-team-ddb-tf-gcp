@@ -109,3 +109,12 @@ resource "google_compute_firewall" "nat_ingress_from_private" {
     ports    = ["80", "443"]
   } # HTTP/HTTPS
 }
+
+resource "google_compute_route" "private_route" {
+  name              = "private-route"
+  network           = var.network
+  dest_range        = "0.0.0.0/0"
+  next_hop_instance = google_compute_instance.nat_bastion.self_link
+  priority          = 1000
+  tags              = [var.private_route_tag]
+}
