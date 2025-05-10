@@ -49,6 +49,7 @@ resource "google_compute_instance" "ai" {
   boot_disk {
     initialize_params {
       image = "ubuntu-2204-jammy-v20250425"
+      size  = 20
     }
   }
 
@@ -60,7 +61,7 @@ resource "google_compute_instance" "ai" {
   metadata = {
     ssh-keys = join("\n", local.ssh_key_entries)
   }
-
+  allow_stopping_for_update = true
   metadata_startup_script = file("${path.module}/scripts/startup.sh")
 }
 

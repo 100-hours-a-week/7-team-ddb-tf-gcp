@@ -3,9 +3,9 @@ output "instance_group" {
   value       = google_compute_instance_group.be_group.self_link
 }
 
-output "health_check_id" {
+output "health_check" {
   description = "ID of BE health check"
-  value       = google_compute_health_check.be_hc.id
+  value       = google_compute_health_check.be_hc.self_link
 }
 
 output "port_name" {

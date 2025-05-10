@@ -28,11 +28,6 @@ variable "private_route_tag" {
   type = string
 }
 
-variable "allowed_ssh_cidrs" {
-  description = "ssh 접근이 허용될 cidr"
-  type        = list(string)
-}
-
 variable "ssh_users" {
   description = "bastion에 접근가능 한 유저 이름"
   type    = list(string)
