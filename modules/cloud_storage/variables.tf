@@ -29,8 +29,3 @@ variable "backend_service_account_email" {
   description = "이미지를 업로드할 백엔드 서비스 계정의 이메일 주소"
   type        = string
 }
-
-variable "frontend_service_account_email" {
-  description = "이미지를 업로드할 프론트 서비스 계정의 이메일 주소"
-  type        = string
-}
