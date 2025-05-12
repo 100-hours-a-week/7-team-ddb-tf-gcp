@@ -111,7 +111,7 @@ resource "google_compute_firewall" "nat_ingress_from_private" {
 }
 
 resource "google_compute_route" "private_route" {
-  name              = "private-route"
+  name              = "private-route-${var.env}"
   network           = var.network
   dest_range        = "0.0.0.0/0"
   next_hop_instance = google_compute_instance.nat_bastion.self_link
