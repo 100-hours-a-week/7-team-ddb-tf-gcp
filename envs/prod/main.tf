@@ -127,9 +127,8 @@ module "cloud_storage" {
   bucket_name                    = var.bucket_name
   location                       = "ASIA"
   force_destroy                  = true
-  cors_origins                   = [var.fe_domain, var.be_domain]
+  cors_origins                   = [var.cors_origin]
   backend_service_account_email  = var.backend_service_account_email
-  frontend_service_account_email = var.frontend_service_account_email
 }
 
 module "ai" {

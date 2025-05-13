@@ -163,11 +163,6 @@ variable "backend_service_account_email" {
   description = "backend 서비스 계정 이메일"
   default     = "backend@velvety-calling-458402-c1.iam.gserviceaccount.com"
 }
-variable "frontend_service_account_email" {
-  type        = string
-  description = "frontend 서비스 계정 이메일"
-  default     = "frontend@velvety-calling-458402-c1.iam.gserviceaccount.com"
-}
 variable "bucket_service_name" {
   type        = string
   description = "이미지 서비스 이름"
@@ -177,6 +172,11 @@ variable "bucket_domain" {
   type        = string
   description = "bucket domain"
   default     = "cdn.dolpin.site"
+}
+variable "cors_origin" {
+  type        = string
+  description = "cors_origin"
+  default     = "https://dolpin.site"
 }
 
 // ai
