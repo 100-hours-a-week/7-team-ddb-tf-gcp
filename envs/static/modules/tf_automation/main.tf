@@ -110,15 +110,6 @@ resource "google_service_account" "build_sa" {
 }
 
 # Pub/Sub IAM: Build 계정 구독 권한
-resource "google_pubsub_topic_iam_binding" "scheduler_pub" {
-  topic = google_pubsub_topic.tf_scheduler_topic.name
-  role  = "roles/pubsub.publisher"
-  members = [
-    "serviceAccount:${google_service_account.scheduler_sa.email}",
-  ]
-}
-
-# Pub/Sub topic을 구독할 수 있도록 Build SA에 subscriber 역할 추가
 resource "google_pubsub_topic_iam_binding" "build_sub" {
   topic = google_pubsub_topic.tf_scheduler_topic.name
   role  = "roles/pubsub.subscriber"
