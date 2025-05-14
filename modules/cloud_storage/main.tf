@@ -13,6 +13,12 @@ resource "google_storage_bucket" "image_bucket" {
     max_age_seconds = 3600
   }
 
+  public_access_prevention = "enforced"
+
+  versioning {
+    enabled = true
+  } 
+
   labels = {
     name        = "${var.env}-image-storage-bucket" 
     environment = var.env                           
