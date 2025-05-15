@@ -140,7 +140,7 @@ variable "be_health_check_path" {
 variable "db_user" {
   type        = string
   description = "backend service port"
-  default     = "postgres"
+  default     = "dolpinuser"
 }
 variable "db_password" {
   type        = string
