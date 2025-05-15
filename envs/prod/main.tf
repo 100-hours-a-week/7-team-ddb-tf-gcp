@@ -97,15 +97,6 @@ module "be" {
   network              = module.network.vpc_self_link
 }
 
-module "cloudsql_networking" {
-  source = "../../modules/cloudsql_networking"
-
-  env           = var.env
-  vpc_self_link = module.network.vpc_self_link
-  component     = "primary"
-  prefix_length = 24
-}
-
 module "cloudsql" {
   source              = "../../modules/cloud_sql"
   env                 = var.env
@@ -117,8 +108,9 @@ module "cloudsql" {
   db_name             = var.db_name
   db_user             = var.db_user
   db_password         = var.db_password
-  depends_on          = [module.cloudsql_networking]
   backup_bucket_name = var.backup_bucket_name
+  vpc_self_link = module.network.vpc_self_link
+  prefix_length = 24
 }
 
 module "cloud_storage" {
