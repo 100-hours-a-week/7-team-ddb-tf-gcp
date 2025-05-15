@@ -116,6 +116,7 @@ module "cloudsql" {
   db_user             = var.db_user
   db_password         = var.db_password
   depends_on          = [module.cloudsql_networking]
+  backup_bucket_name = var.backup_bucket_name
 }
 
 module "cloud_storage" {

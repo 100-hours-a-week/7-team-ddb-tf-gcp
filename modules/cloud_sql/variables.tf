@@ -50,3 +50,8 @@ variable "db_name" {
   description = "생성할 database 이름"
   type        = string
 }
+
+variable "backup_bucket_name" {
+  description = "백업할 bucket 이름"
+  type = string
+}

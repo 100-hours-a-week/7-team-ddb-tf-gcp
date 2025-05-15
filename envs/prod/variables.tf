@@ -261,3 +261,9 @@ variable "fe_health_check_path" {
   description = "frontend instance의 health check 주소"
   default     = "/api/health"
 }
+
+variable "backup_bucket_name" {
+  type = string
+  description = "백업할 bucket 이름"
+  default = "static-backup-bucket"
+}

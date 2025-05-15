@@ -29,3 +29,16 @@ resource "google_sql_user" "default" {
   instance    = google_sql_database_instance.postgres.id
   password_wo = var.db_password
 }
+
+resource "google_storage_bucket_iam_member" "allow_sql_export" {
+  bucket = var.backup_bucket_name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${google_sql_database_instance.postgres.service_account_email_address}"
+}
+
+resource "google_storage_bucket_iam_member" "allow_sql_import" {
+  bucket = var.backup_bucket_name
+  role   = "roles/storage.objectViwer"
+  member = "serviceAccount:${google_sql_database_instance.postgres.service_account_email_address}"
+}
+
