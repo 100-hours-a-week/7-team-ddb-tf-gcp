@@ -13,8 +13,6 @@ resource "google_storage_bucket" "image_bucket" {
     max_age_seconds = 3600
   }
 
-  public_access_prevention = "enforced"
-
   versioning {
     enabled = true
   } 
@@ -42,10 +40,9 @@ resource "google_compute_backend_bucket" "image_backend_bucket" {
   enable_cdn  = true 
 } 
 
-data "google_project" "project" {}
-
-resource "google_storage_bucket_iam_member" "cdn_access" {
+# 이미지 공개 읽기 권한 설정
+resource "google_storage_bucket_iam_member" "public_access" { 
   bucket = google_storage_bucket.image_bucket.name
   role   = "roles/storage.objectViewer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  member = "allUsers" 
 }
