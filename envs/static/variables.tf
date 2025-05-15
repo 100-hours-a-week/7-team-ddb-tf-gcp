@@ -31,19 +31,19 @@ variable "tf_automation_schedules" {
   default = {
     apply = [
       # main 브랜치: 평일 오전 9시 30분 시작
-      { branch = "main", schedule = "30 9 * * 1-5" },
+      { branch = "main", schedule = "00 9 * * 1-5" },
 
       # dev 브랜치: 일~목 오후 12시 30분 시작
-      { branch = "dev", schedule = "30 12 * * 0-4" },
+      { branch = "dev", schedule = "00 12 * * 0-4" },
 
       # dev 브랜치: 금요일 오전 8시 30분 시작
-      { branch = "dev", schedule = "30 8 * * 5" },
+      { branch = "dev", schedule = "00 8 * * 5" },
 
       # dev 브랜치: 토요일 오후 12시 30분 시작
-      { branch = "dev", schedule = "30 12 * * 6" }
+      { branch = "dev", schedule = "00 12 * * 6" }
     ]
     destroy = [
-      # main 브랜치: 평일(월~금) 오후 8시에 종료
+      # # main 브랜치: 평일(월~금) 오후 8시에 종료
       # { branch = "main", schedule = "0 20 * * 1-5" },
 
       # # dev 브랜치: 일~목 오후 11시에 종료
@@ -58,6 +58,17 @@ variable "tf_automation_schedules" {
   }
 }
 
+variable "envs_parameter" {
+  type = map(object({
+    db_name     = string
+    db_instance = string
+  }))
+  description = "환경별 필요 파라미터"
+  default = {
+    dev  = { db_name = "dolpin", db_instance = "db-dev-primary" }
+    prod = { db_name = "dolpin", db_instance = "db-prod-primary" }
+  }
+}
 
 variable "bucket_location" {
   type        = string
@@ -75,4 +86,10 @@ variable "account_key_name" {
   type        = string
   description = "권한이 있는 account.json secret key 이름"
   default     = "terraform-sa-key"
+}
+
+variable "backup_bucket_name" {
+  type        = string
+  description = "백업에 사용할 버킷 이름"
+  default     = "static-backup-bucket"
 }

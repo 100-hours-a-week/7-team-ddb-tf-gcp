@@ -16,6 +16,15 @@ variable "schedules" {
   })))
 }
 
+variable "envs_parameter" {
+  description = "환경별 필요 파라미터"
+  type = map(object({
+    db_name     = string
+    db_instance = string
+  }))
+
+}
+
 variable "project_id" {
   description = "GCP 프로젝트 ID"
   type        = string
@@ -29,4 +38,10 @@ variable "repo_url" {
 variable "account_key_name" {
   description = "Secret Manager에 저장된 서비스 계정 키 비밀 이름"
   type        = string
+}
+
+
+variable "backup_bucket_name" {
+  description = "백업에 사용할 버킷 이름"
+  type = string
 }

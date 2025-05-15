@@ -7,8 +7,8 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket      = "dolpin-terraform-state-29m1t350"
-    prefix      = "static"
+    bucket = "dolpin-terraform-state-29m1t350"
+    prefix = "static"
   }
 }
 
@@ -25,5 +25,7 @@ module "tf_automation" {
   location           = var.bucket_location
   project_id         = var.project_id
   repo_url           = var.repo_url
-  account_key_name = var.account_key_name
+  account_key_name   = var.account_key_name
+  envs_parameter     = var.envs_parameter
+  backup_bucket_name = var.backup_bucket_name
 }
