@@ -107,8 +107,7 @@ module "cloudsql" {
   db_user             = var.db_user
   db_password         = var.db_password
   backup_bucket_name  = var.backup_bucket_name
-  vpc_self_link       = module.network.vpc_self_link
-  prefix_length       = 24
+  nat_ip_address      = module.nat_bastion.nat_ip
 }
 
 module "cloud_storage" {

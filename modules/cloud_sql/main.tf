@@ -5,8 +5,11 @@ resource "google_sql_database_instance" "postgres" {
   settings {
     tier = var.tier
     ip_configuration {
-      ipv4_enabled    = false
-      private_network = var.vpc_network_id
+      ipv4_enabled    = true
+      authorized_networks {
+        name = "nat 경로"
+        value = var.nat_ip_address
+      }
     }
     user_labels = {
       name      = "${var.env}-${var.component}-${var.resource_type}"
@@ -40,18 +43,4 @@ resource "google_storage_bucket_iam_member" "allow_sql_import" {
   bucket = var.backup_bucket_name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_sql_database_instance.postgres.service_account_email_address}"
-}
-
-resource "google_compute_global_address" "private_ip_range" {
-  name          = "cloudsql-peering-range-${var.env}-${var.component}"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = var.prefix_length
-  network       = var.vpc_self_link
-}
-
-resource "google_service_networking_connection" "private_vpc_connection" {
-  network                 = var.vpc_self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_range.name]
 }
