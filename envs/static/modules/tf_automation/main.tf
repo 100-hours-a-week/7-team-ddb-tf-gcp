@@ -28,7 +28,6 @@ resource "google_cloud_scheduler_job" "tf_scheduler_jobs" {
 resource "google_storage_bucket" "backup_bucket" {
   name          = var.backup_bucket_name
   location      = var.location
-  force_destroy = true
 
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
