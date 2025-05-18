@@ -13,7 +13,7 @@ resource "google_compute_subnetwork" "subnets" {
 }
 
 resource "google_compute_route" "public_route" {
-  name             = "public-route"
+  name             = "public-route-${var.env}"
   network          = google_compute_network.vpc.id
   dest_range       = "0.0.0.0/0"
   next_hop_gateway = "default-internet-gateway"
