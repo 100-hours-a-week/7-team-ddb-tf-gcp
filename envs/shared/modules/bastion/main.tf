@@ -70,8 +70,6 @@ resource "google_compute_instance" "bastion" {
   metadata = {
     ssh-keys = join("\n", local.ssh_key_entries)
   }
-
-  metadata_startup_script = file("${path.module}/scripts/startup.sh")
 }
 
 // bastion instance의 방화벽
