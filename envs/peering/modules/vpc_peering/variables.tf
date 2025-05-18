@@ -30,14 +30,20 @@ variable "import_custom_routes" {
   default     = true
 }
 
-variable "peer_export_custom_routes" {
-  description = "상대 VPC에서 custom route export 여부"
-  type        = bool
-  default     = true
+variable "create_firewall" {
+  type    = bool
+  default = true
 }
 
-variable "peer_import_custom_routes" {
-  description = "상대 VPC에서 custom route import 여부"
-  type        = bool
-  default     = true
+variable "peer_cidr_blocks" {
+  type = list(string)
+}
+
+variable "allowed_ports" {
+  type    = list(string)
+  default = ["22", "80", "443"]
+}
+
+variable "firewall_target_tags" {
+  type = list(string)
 }
