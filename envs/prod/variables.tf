@@ -142,11 +142,6 @@ variable "db_user" {
   description = "backend service port"
   default     = "dolpinuser"
 }
-variable "db_password" {
-  type        = string
-  description = "backend가 사용할 instance type"
-  default     = "0205"
-}
 variable "db_name" {
   type        = string
   description = "backend instance의 health check 주소"

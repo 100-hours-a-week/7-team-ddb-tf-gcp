@@ -105,7 +105,6 @@ module "cloudsql" {
   deletion_protection = false
   db_name             = var.db_name
   db_user             = var.db_user
-  db_password         = var.db_password
   backup_bucket_name  = var.backup_bucket_name
   nat_ip_address      = module.nat_bastion.nat_ip
 }
