@@ -1,4 +1,4 @@
-output "cloudsql_private_ip" {
-  description = "Private IP address of the Cloud SQL PostgreSQL instance"
-  value       = google_sql_database_instance.postgres.private_ip_address
+output "cloudsql_public_ip" {
+  description = "cloud sql의 공개 ip 주소"
+  value       = google_sql_database_instance.postgres.public_ip_address
 }

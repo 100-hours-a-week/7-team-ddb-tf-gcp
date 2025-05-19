@@ -95,6 +95,7 @@ module "be" {
   env                  = var.env
   private_route_tag    = var.private_tag
   network              = module.network.vpc_self_link
+  cloudsql_ip_address  = module.cloudsql.cloudsql_public_ip
 }
 
 module "cloudsql" {
