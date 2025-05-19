@@ -52,3 +52,7 @@ variable "bastion_tag" {
   description = "bastion tag"
   type = string
 }
+variable "cloudsql_ip_address" {
+  description = "cloudsql의 public ip"
+  type = string
+}
