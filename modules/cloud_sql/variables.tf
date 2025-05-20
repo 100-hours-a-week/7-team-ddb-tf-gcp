@@ -40,12 +40,6 @@ variable "db_user" {
   sensitive   = true
 }
 
-variable "db_password" {
-  description = "Cloud SQL 사용자 비밀번호"
-  type        = string
-  sensitive   = true
-}
-
 variable "db_name" {
   description = "생성할 database 이름"
   type        = string

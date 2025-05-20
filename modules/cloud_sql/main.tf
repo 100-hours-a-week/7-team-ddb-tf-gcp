@@ -5,9 +5,9 @@ resource "google_sql_database_instance" "postgres" {
   settings {
     tier = var.tier
     ip_configuration {
-      ipv4_enabled    = true
+      ipv4_enabled = true
       authorized_networks {
-        name = "nat 경로"
+        name  = "nat 경로"
         value = var.nat_ip_address
       }
     }
@@ -22,6 +22,23 @@ resource "google_sql_database_instance" "postgres" {
   deletion_protection = var.deletion_protection
 }
 
+resource "random_password" "db_password" {
+  length  = 16
+  special = true
+}
+
+resource "google_secret_manager_secret" "cloudsql_password" {
+  secret_id = "cloudsql-dolpinuser-password-${var.env}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_password_version" {
+  secret      = google_secret_manager_secret.cloudsql_password.id
+  secret_data = random_password.db_password.result
+}
+
 resource "google_sql_database" "default" {
   name     = var.db_name
   instance = google_sql_database_instance.postgres.id
@@ -30,7 +47,7 @@ resource "google_sql_database" "default" {
 resource "google_sql_user" "default" {
   name        = var.db_user
   instance    = google_sql_database_instance.postgres.id
-  password_wo = var.db_password
+  password_wo = random_password.db_password.result
 }
 
 resource "google_storage_bucket_iam_member" "allow_sql_export" {
