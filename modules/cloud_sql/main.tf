@@ -36,7 +36,7 @@ resource "google_secret_manager_secret" "cloudsql_password" {
 
 resource "google_secret_manager_secret_version" "cloudsql_password_version" {
   secret      = google_secret_manager_secret.cloudsql_password.id
-  secret_data = random_password.cloudsql_password.result
+  secret_data = random_password.db_password.result
 }
 
 resource "google_sql_database" "default" {
