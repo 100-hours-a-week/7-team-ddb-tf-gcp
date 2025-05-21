@@ -26,7 +26,7 @@ resource "google_artifact_registry_repository" "this" {
   }
 
   labels = {
-    Name        = "artifact-repo-${var.env}"  
+    name        = "artifact-repo-${var.env}"  
     component   = "backend"                          
     env         = var.env                             
     type        = "artifact-registry"                 
