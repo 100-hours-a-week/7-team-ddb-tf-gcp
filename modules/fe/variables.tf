@@ -34,11 +34,6 @@ variable "subnetwork" {
   type        = string
 }
 
-variable "bastion_tag" {
-  description = "bastion 식별하기 위한 태그"
-  type = string
-}
-
 variable "fe_port" {
   description = "FE 애플리케이션이 수신할 포트 번호 (예: 3000)"
   type = number
@@ -52,4 +47,15 @@ variable "ig_port_name" {
 variable "health_check_path" {
   description = "헬스체크를 위한 요청 경로"
   type        = string
+}
+
+variable "shared_vpc_cidr" {
+  description = "Shared VPC CIDR block (Bastion, Jenkins가 속한 네트워크 대역)"
+  type        = string
+}
+
+variable "project_id" {
+  description = "GCP 프로젝트 ID"
+  type        = string
+  default     = "velvety-calling-458402-c1"
 }

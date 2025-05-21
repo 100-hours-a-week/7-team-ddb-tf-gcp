@@ -48,11 +48,18 @@ variable "be_health_check_path" {
   type = string
 }
 
-variable "bastion_tag" {
-  description = "bastion tag"
-  type = string
-}
 variable "cloudsql_ip_address" {
   description = "cloudsql의 public ip"
   type = string
+}
+
+variable "shared_vpc_cidr" {
+  description = "Shared VPC CIDR block (Bastion, Jenkins가 속한 네트워크 대역)"
+  type        = string
+}
+
+variable "project_id" {
+  description = "GCP 프로젝트 ID"
+  type        = string
+  default     = "velvety-calling-458402-c1"
 }
