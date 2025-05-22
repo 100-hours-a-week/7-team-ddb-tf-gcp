@@ -121,5 +121,5 @@ resource "google_compute_firewall" "jenkins" {
 
   target_tags   = ["jenkins"]
   direction     = "INGRESS"
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.allowed_ssh_cidrs
 }

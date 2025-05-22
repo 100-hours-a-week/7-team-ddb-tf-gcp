@@ -40,3 +40,9 @@ variable "ssh_users" {
   description = "Jenkins 인스턴스에 SSH로 접속할 사용자 계정 목록"
   type        = list(string)
 }
+
+variable "allowed_ssh_cidrs" {
+  type        = list(string)
+  description = "젠킨스에 접근 가능한 ssh cidr 리스트"
+  default     = ["0.0.0.0/0"]
+}
