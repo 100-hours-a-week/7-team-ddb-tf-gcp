@@ -23,9 +23,8 @@ module "network" {
   source           = "../../modules/network"
   public_route_tag = var.public_tag
   subnets = {
-    (var.public_service_name) : { cidr : var.public_cidr }
-    (var.be_service_name) : { cidr : var.be_cidr }
-    (var.ai_service_name) : { cidr : var.ai_cidr }
+    (var.be_service_name) : { cidr : var.be_cidr },
+    (var.ai_service_name) : { cidr : var.ai_cidr },
     (var.fe_service_name) : { cidr : var.fe_cidr }
   }
   env = var.env
@@ -67,19 +66,6 @@ module "dns" {
   }
 }
 
-module "nat_bastion" {
-  source            = "../../modules/nat_bastion"
-  machine_type      = var.nat_bastion_instance_type
-  network           = module.network.vpc_self_link
-  subnetwork        = module.network.subnet_self_links[var.public_service_name]
-  private_route_tag = var.private_tag
-  public_route_tag  = var.public_tag
-  allowed_ssh_cidrs = var.nat_bastion_allowed_ssh_cidrs
-  ssh_users         = var.nat_bastion_ssh_users
-  env               = var.env
-  zone              = var.nat_bastion_zone
-}
-
 module "be" {
   source               = "../../modules/be"
   be_health_check_path = var.be_health_check_path
@@ -88,11 +74,11 @@ module "be" {
   zone                 = var.be_zone
   ssh_users            = var.be_ssh_users
   be_port              = var.be_port
-  bastion_tag          = module.nat_bastion.nat_bastion_tag
   machine_type         = var.be_instance_type
   env                  = var.env
   private_route_tag    = var.private_tag
   network              = module.network.vpc_self_link
+  shared_vpc_cidr      = var.shared_vpc_cidr
   cloudsql_ip_address  = module.cloudsql.cloudsql_public_ip
 }
 
@@ -107,7 +93,7 @@ module "cloudsql" {
   db_name             = var.db_name
   db_user             = var.db_user
   backup_bucket_name  = var.backup_bucket_name
-  nat_ip_address      = module.nat_bastion.nat_ip
+  nat_ip_address      = module.nat_gateway.nat_ip
 }
 
 module "cloud_storage" {
@@ -118,7 +104,7 @@ module "cloud_storage" {
   location                      = "ASIA"
   force_destroy                 = true
   cors_origins                  = [var.cors_origin]
-  backend_service_account_email = var.backend_service_account_email
+  backend_service_account_email = module.be.service_account_email
 }
 
 module "ai" {
@@ -130,9 +116,9 @@ module "ai" {
   machine_type      = var.ai_instance_type
   ssh_users         = var.ai_ssh_users
   private_route_tag = var.private_tag
-  bastion_tag       = module.nat_bastion.nat_bastion_tag
   ai_port           = var.ai_port
   ai_port_name      = var.ai_service_name
+  shared_vpc_cidr   = var.shared_vpc_cidr
   health_check_path = var.ai_health_check_path
 }
 
@@ -145,8 +131,59 @@ module "fe" {
   machine_type      = var.fe_instance_type
   ssh_users         = var.fe_ssh_users
   private_route_tag = var.private_tag
-  bastion_tag       = module.nat_bastion.nat_bastion_tag
   fe_port           = var.fe_port
   ig_port_name      = var.fe_service_name
   health_check_path = var.fe_health_check_path
+  shared_vpc_cidr   = var.shared_vpc_cidr
+}
+
+module "nat_gateway" {
+  source        = "../../modules/nat_gateway"  
+  env           = var.env
+  vpc_self_link = module.network.vpc_self_link
+}
+
+module "gar" {
+  source          = "../../modules/gar"
+  location        = var.gar_location
+  env             = var.env
+  format          = var.gar_format
+  immutable_tags  = var.immutable_tags
+  cleanup_policies = var.cleanup_policies
+}
+
+data "terraform_remote_state" "shared" {
+  backend = "gcs"
+  config = {
+    bucket = "dolpin-terraform-state-29m1t350"
+    prefix = "shared"
+  }
+}
+
+module "vpc_peering_shared_to_env" {
+  source               = "../../modules/vpc_peering"
+  name_prefix          = var.shared_name_prefix
+  peer_name            = var.env
+  this_vpc_self_link   = data.terraform_remote_state.shared.outputs.vpc_self_link
+  peer_vpc_self_link   = module.network.vpc_self_link
+  peer_cidr_blocks     = values(module.network.subnet_cidrs)
+  firewall_target_tags = [var.shared_name_prefix]
+  allowed_ports        = var.allowed_ports
+  create_firewall      = var.create_firewall
+  export_custom_routes = var.export_custom_routes
+  import_custom_routes = var.import_custom_routes
+}
+
+module "vpc_peering_env_to_shared" {
+  source               = "../../modules/vpc_peering"
+  name_prefix          = var.env
+  peer_name            = var.shared_name_prefix
+  this_vpc_self_link   = module.network.vpc_self_link
+  peer_vpc_self_link   = data.terraform_remote_state.shared.outputs.vpc_self_link
+  peer_cidr_blocks     = values(data.terraform_remote_state.shared.outputs.subnet_cidrs)
+  firewall_target_tags = [var.env]
+  allowed_ports        = var.allowed_ports
+  create_firewall      = var.create_firewall
+  export_custom_routes = var.export_custom_routes
+  import_custom_routes = var.import_custom_routes
 }
