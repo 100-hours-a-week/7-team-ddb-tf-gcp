@@ -14,20 +14,22 @@ resource "google_cloud_scheduler_job" "tf_scheduler_jobs" {
   pubsub_target {
     topic_name = google_pubsub_topic.tf_scheduler_topic.id
     attributes = {
-      branch       = each.value.branch
-      action       = each.value.action
-      path         = each.value.branch == "main" ? "prod" : each.value.branch
-      dbinstance   = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].db_instance
-      dbname       = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].db_name
-      cloudstorage = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].cloudstorage
+      branch          = each.value.branch
+      action          = each.value.action
+      path            = each.value.branch == "main" ? "prod" : each.value.branch
+      dbinstance      = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].db_instance
+      dbname          = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].db_name
+      cloudstorage    = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].cloudstorage
+      dbpwdsecretname = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].dbpwdsecretname
+      dbuser          = var.envs_parameter[each.value.branch == "main" ? "prod" : each.value.branch].dbuser
     }
   }
 }
 
 # GCS 백업 버킷 생성
 resource "google_storage_bucket" "backup_bucket" {
-  name          = var.backup_bucket_name
-  location      = var.location
+  name     = var.backup_bucket_name
+  location = var.bucket_location
 
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
@@ -54,12 +56,14 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
     topic = google_pubsub_topic.tf_scheduler_topic.id
   }
   substitutions = {
-    _BRANCH       = "$(body.message.attributes.branch)"
-    _ACTION       = "$(body.message.attributes.action)"
-    _PATH         = "$(body.message.attributes.path)"
-    _DBINSTANCE   = "$(body.message.attributes.dbinstance)"
-    _DBNAME       = "$(body.message.attributes.dbname)"
-    _CLOUDSTORAGE = "$(body.message.attributes.cloudstorage)"
+    _BRANCH         = "$(body.message.attributes.branch)"
+    _ACTION         = "$(body.message.attributes.action)"
+    _PATH           = "$(body.message.attributes.path)"
+    _DBINSTANCE     = "$(body.message.attributes.dbinstance)"
+    _DBNAME         = "$(body.message.attributes.dbname)"
+    _DBPWSECRETNAME = "$(body.message.attributes.dbpwdsecretname)"
+    _CLOUDSTORAGE   = "$(body.message.attributes.cloudstorage)"
+    _DBUSER         = "$(body.message.attributes.dbuser)"
   }
 
   service_account = google_service_account.build_sa.id
@@ -121,6 +125,35 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
           gsutil -m rsync -r \
             "gs://$${_CLOUDSTORAGE}" \
             "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/storage/storage_backup_$$TS/"
+        fi
+        EOF
+      ]
+    }
+
+    step {
+      name       = "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+      entrypoint = "bash"
+      args = ["-c",
+        <<-EOF
+        set -e
+        if [ "$${_ACTION}" = "destroy" ]; then
+          apt-get update && apt-get install -y postgresql-client wget
+          wget -qO /usr/local/bin/cloud_sql_proxy \
+          https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
+          chmod +x /usr/local/bin/cloud_sql_proxy
+          /usr/local/bin/cloud_sql_proxy \
+          -dir=/cloudsql \
+          -instances=velvety-calling-458402-c1:asia-northeast3:$${_DBINSTANCE} \
+          -credential_file=/workspace/repo/secrets/account.json &
+          sleep 5 
+          export PGPASSWORD="$(gcloud secrets versions access latest --secret="$${_DBPWSECRETNAME}")"
+          psql \
+          -h "/cloudsql/${var.project_id}:${var.region}:$${_DBINSTANCE}" \
+          -U "$${_DBUSER}" \
+          -d "$${_DBNAME}" \
+          -c "REVOKE CONNECT ON DATABASE $${_DBNAME} FROM public;
+              SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$${_DBNAME}' AND pid <> pg_backend_pid();"
+          kill $!
         fi
         EOF
       ]

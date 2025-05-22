@@ -3,7 +3,12 @@ variable "env" {
   type        = string
 }
 
-variable "location" {
+variable "bucket_location" {
+  description = "리소스를 생성할 GCP 지역 또는 영역"
+  type        = string
+}
+
+variable "region" {
   description = "리소스를 생성할 GCP 지역 또는 영역"
   type        = string
 }
@@ -19,9 +24,11 @@ variable "schedules" {
 variable "envs_parameter" {
   description = "환경별 필요 파라미터"
   type = map(object({
-    db_name     = string
-    db_instance = string
-    cloudstorage = string
+    db_name         = string
+    db_instance     = string
+    cloudstorage    = string
+    dbpwdsecretname = string
+    dbuser          = string
   }))
 
 }
@@ -44,5 +51,5 @@ variable "account_key_name" {
 
 variable "backup_bucket_name" {
   description = "백업에 사용할 버킷 이름"
-  type = string
+  type        = string
 }
