@@ -61,7 +61,7 @@ resource "google_sql_database" "default" {
 resource "google_sql_user" "default" {
   name        = var.db_user
   instance    = google_sql_database_instance.postgres.id
-  password_wo = var.db_password
+  password_wo = random_password.db_password.result
 }
 
 resource "google_storage_bucket_iam_member" "allow_sql_export" {
