@@ -19,6 +19,19 @@ resource "google_sql_database_instance" "postgres" {
   deletion_protection = var.deletion_protection
 }
 
+resource "google_secret_manager_secret" "cloudsql_ip" {
+  secret_id = "cloudsql-public-ip-${var.env}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_ip_version" {
+  secret      = google_secret_manager_secret.cloudsql_ip.id
+  secret_data = google_sql_database_instance.postgres.public_ip_address
+}
+
 resource "google_sql_database" "default" {
   name     = var.db_name
   instance = google_sql_database_instance.postgres.id
