@@ -25,6 +25,7 @@ resource "google_sql_database_instance" "postgres" {
 resource "random_password" "db_password" {
   length  = 16
   special = true
+  override_special = "!@#%^&*()-_+[]{}<>?"
 }
 
 resource "google_secret_manager_secret" "cloudsql_password" {
