@@ -25,8 +25,8 @@ module "network" {
   subnets = {
     (var.public_service_name) : { cidr : var.public_cidr }
     (var.be_service_name) : { cidr : var.be_cidr }
-    (var.ai_service_name) : {cidr: var.ai_cidr}
-    (var.fe_service_name) : {cidr: var.fe_cidr}
+    (var.ai_service_name) : { cidr : var.ai_cidr }
+    (var.fe_service_name) : { cidr : var.fe_cidr }
   }
   env = var.env
 }
@@ -39,12 +39,12 @@ module "dns" {
   fallback_service_key         = var.be_service_name
   domains                      = [var.be_domain, var.bucket_domain, var.ai_domain, var.fe_domain]
   network                      = module.network.vpc_self_link
-  services = { 
+  services = {
     (var.be_service_name) : {
-    domain         = var.be_domain
-    instance_group = module.be.instance_group
-    health_check   = module.be.health_check
-    port_name      = var.be_service_name
+      domain         = var.be_domain
+      instance_group = module.be.instance_group
+      health_check   = module.be.health_check
+      port_name      = var.be_service_name
     }
     (var.bucket_service_name) : {
       domain         = var.bucket_domain
@@ -93,15 +93,7 @@ module "be" {
   env                  = var.env
   private_route_tag    = var.private_tag
   network              = module.network.vpc_self_link
-}
-
-module "cloudsql_networking" {
-  source = "../../modules/cloudsql_networking"
-
-  env           = var.env
-  vpc_self_link = module.network.vpc_self_link
-  component     = "primary"
-  prefix_length = 24
+  cloudsql_ip_address  = module.cloudsql.cloudsql_public_ip
 }
 
 module "cloudsql" {
@@ -114,24 +106,23 @@ module "cloudsql" {
   deletion_protection = false
   db_name             = var.db_name
   db_user             = var.db_user
-  db_password         = var.db_password
-  depends_on          = [module.cloudsql_networking]
+  backup_bucket_name  = var.backup_bucket_name
+  nat_ip_address      = module.nat_bastion.nat_ip
 }
 
 module "cloud_storage" {
   source = "../../modules/cloud_storage"
 
-  env                            = var.env
-  bucket_name                    = var.bucket_name
-  location                       = "ASIA"
-  force_destroy                  = true
-  cors_origins                   = [var.fe_domain, var.be_domain]
-  backend_service_account_email  = var.backend_service_account_email
-  frontend_service_account_email = var.frontend_service_account_email
+  env                           = var.env
+  bucket_name                   = var.bucket_name
+  location                      = "ASIA"
+  force_destroy                 = true
+  cors_origins                  = [var.cors_origin]
+  backend_service_account_email = var.backend_service_account_email
 }
 
 module "ai" {
-  source = "../../modules/ai"
+  source            = "../../modules/ai"
   env               = var.env
   network           = module.network.vpc_self_link
   subnetwork        = module.network.subnet_self_links[var.ai_service_name]

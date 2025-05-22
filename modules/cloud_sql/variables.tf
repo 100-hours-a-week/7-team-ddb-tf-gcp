@@ -40,13 +40,17 @@ variable "db_user" {
   sensitive   = true
 }
 
-variable "db_password" {
-  description = "Cloud SQL 사용자 비밀번호"
-  type        = string
-  sensitive   = true
-}
-
 variable "db_name" {
   description = "생성할 database 이름"
   type        = string
+}
+
+variable "backup_bucket_name" {
+  description = "백업할 bucket 이름"
+  type = string
+}
+
+variable "nat_ip_address" {
+  description = "nat의 ip 주소"
+  type = string
 }

@@ -140,18 +140,14 @@ variable "be_health_check_path" {
 variable "db_user" {
   type        = string
   description = "backend service port"
-  default     = "postgres"
-}
-variable "db_password" {
-  type        = string
-  description = "backend가 사용할 instance type"
-  default     = "0205"
+  default     = "dolpinuser"
 }
 variable "db_name" {
   type        = string
   description = "backend instance의 health check 주소"
   default     = "dolpin"
 }
+
 // bucket
 variable "bucket_name" {
   type        = string
@@ -163,11 +159,6 @@ variable "backend_service_account_email" {
   description = "backend 서비스 계정 이메일"
   default     = "backend@velvety-calling-458402-c1.iam.gserviceaccount.com"
 }
-variable "frontend_service_account_email" {
-  type        = string
-  description = "frontend 서비스 계정 이메일"
-  default     = "frontend@velvety-calling-458402-c1.iam.gserviceaccount.com"
-}
 variable "bucket_service_name" {
   type        = string
   description = "이미지 서비스 이름"
@@ -177,6 +168,11 @@ variable "bucket_domain" {
   type        = string
   description = "bucket domain"
   default     = "cdn.dev.dolpin.site"
+}
+variable "cors_origin" {
+  type        = string
+  description = "cors_origin"
+  default     = "https://fe.dev.dolpin.site"
 }
 
 // ai
@@ -260,4 +256,10 @@ variable "fe_health_check_path" {
   type        = string
   description = "frontend instance의 health check 주소"
   default     = "/api/health"
+}
+
+variable "backup_bucket_name" {
+  type = string
+  description = "백업할 bucket 이름"
+  default = "static-backup-bucket"
 }

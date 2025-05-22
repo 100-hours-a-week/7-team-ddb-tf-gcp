@@ -8,10 +8,14 @@ resource "google_storage_bucket" "image_bucket" {
 
   cors { 
     origin          = var.cors_origins
-    method          = ["GET", "HEAD"]
-    response_header = ["Content-Type"]
+    method          = ["GET", "HEAD", "PUT", "OPTIONS"]
+    response_header = ["Content-Type", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers"]
     max_age_seconds = 3600
   }
+
+  versioning {
+    enabled = true
+  } 
 
   labels = {
     name        = "${var.env}-image-storage-bucket" 
@@ -20,13 +24,6 @@ resource "google_storage_bucket" "image_bucket" {
     type        = "gcs"                             
     managed_by  = "terraform"                       
   }
-}
-
-# 이미지 공개 읽기 권한 설정
-resource "google_storage_bucket_iam_member" "public_access" { 
-  bucket = google_storage_bucket.image_bucket.name
-  role   = "roles/storage.objectViewer"
-  member = "allUsers" 
 }
 
 # 백엔드 서비스 계정에 전체 권한 부여
@@ -42,3 +39,10 @@ resource "google_compute_backend_bucket" "image_backend_bucket" {
   bucket_name = google_storage_bucket.image_bucket.name
   enable_cdn  = true 
 } 
+
+# 이미지 공개 읽기 권한 설정
+resource "google_storage_bucket_iam_member" "public_access" { 
+  bucket = google_storage_bucket.image_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers" 
+}
