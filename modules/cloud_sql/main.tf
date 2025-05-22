@@ -40,6 +40,19 @@ resource "google_secret_manager_secret_version" "cloudsql_password_version" {
   secret_data = random_password.db_password.result
 }
 
+resource "google_secret_manager_secret" "cloudsql_ip" {
+  secret_id = "cloudsql-public-ip-${var.env}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "cloudsql_ip_version" {
+  secret      = google_secret_manager_secret.cloudsql_ip.id
+  secret_data = google_sql_database_instance.postgres.public_ip_address
+}
+
 resource "google_sql_database" "default" {
   name     = var.db_name
   instance = google_sql_database_instance.postgres.id

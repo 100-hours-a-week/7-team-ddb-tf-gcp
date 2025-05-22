@@ -10,3 +10,15 @@ output "subnet_self_links" {
     k => subnet.self_link
   }
 }
+
+output "subnet_cidrs" {
+  description = "서브넷별 CIDR 목록"
+  value = {
+    for k, v in var.subnets : k => v.cidr
+  }
+}
+
+output "subnets" {
+  description = "입력받은 서브넷 정보 전체"
+  value       = var.subnets
+}
