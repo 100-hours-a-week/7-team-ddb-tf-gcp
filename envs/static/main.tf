@@ -22,7 +22,8 @@ module "tf_automation" {
   source             = "./modules/tf_automation"
   schedules          = var.tf_automation_schedules
   env                = var.env
-  location           = var.bucket_location
+  bucket_location    = var.bucket_location
+  region           = var.region
   project_id         = var.project_id
   repo_url           = var.repo_url
   account_key_name   = var.account_key_name

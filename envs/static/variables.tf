@@ -57,14 +57,28 @@ variable "tf_automation_schedules" {
 
 variable "envs_parameter" {
   type = map(object({
-    db_name      = string
-    db_instance  = string
-    cloudstorage = string
+    db_name         = string
+    db_instance     = string
+    cloudstorage    = string
+    dbpwdsecretname = string
+    dbuser          = string
   }))
   description = "환경별 필요 파라미터"
   default = {
-    dev  = { db_name = "dolpin", db_instance = "db-dev-primary", cloudstorage = "dolpin-image-dev" }
-    prod = { db_name = "dolpin", db_instance = "db-prod-primary", cloudstorage = "dolpin-image-prod" }
+    dev = {
+      db_name         = "dolpin",
+      db_instance     = "db-dev-primary",
+      cloudstorage    = "dolpin-image-dev",
+      dbpwdsecretname = "cloudsql-dolpinuser-password-dev",
+      dbuser          = "dolpinuser"
+    }
+    prod = {
+      db_name         = "dolpin",
+      db_instance     = "db-prod-primary",
+      cloudstorage    = "dolpin-image-prod",
+      dbpwdsecretname = "cloudsql-dolpinuser-password-prod",
+      dbuser          = "dolpinuser"
+    }
   }
 }
 
