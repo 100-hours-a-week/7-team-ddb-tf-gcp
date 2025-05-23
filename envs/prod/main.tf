@@ -94,7 +94,7 @@ module "cloudsql" {
   db_name             = var.db_name
   db_user             = var.db_user
   backup_bucket_name  = var.backup_bucket_name
-  nat_ip_address      = module.nat_bastion.nat_ip
+  nat_ip_address      = module.nat_gateway.nat_ip
 }
 
 module "cloud_storage" {
