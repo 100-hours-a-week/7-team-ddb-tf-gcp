@@ -128,7 +128,7 @@ resource "google_compute_firewall" "ssh_from_shared_to_fe" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["22", "9100"]
   }
 
   source_ranges = [var.shared_vpc_cidr]  
