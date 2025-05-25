@@ -32,11 +32,13 @@ locals {
   ]
 
   jenkins_dockerfile_content = file("${path.module}/scripts/Dockerfile.jenkins")
+  dockercompose_content      = file("${path.module}/files/docker-compose.yml")
 
   rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
     name                     = "jenkins"
     jenkins_priv_key_b64  = base64encode(tls_private_key.jenkins_ssh.private_key_pem)
     dockerfile_content       = local.jenkins_dockerfile_content
+    dockercompose_content = local.dockercompose_content
   })
 }
 
@@ -122,4 +124,18 @@ resource "google_compute_firewall" "jenkins" {
   target_tags   = ["jenkins"]
   direction     = "INGRESS"
   source_ranges = var.allowed_ssh_cidrs
+}
+
+resource "google_compute_firewall" "jenkins_to_monitoring" {
+  name      = "ssh-from-shared-to-ai-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["9100"]
+  }
+
+  source_tags = [local.jenkins_tag]
+  target_tags = ["mon"]
 }
