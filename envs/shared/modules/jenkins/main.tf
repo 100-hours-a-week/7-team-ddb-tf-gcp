@@ -123,3 +123,41 @@ resource "google_compute_firewall" "jenkins" {
   direction     = "INGRESS"
   source_ranges = var.allowed_ssh_cidrs
 }
+
+resource "google_compute_firewall" "lb_to_jenkins" {
+  name    = "allow-lb-to-jenkins"
+  network = var.network
+
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports    = ["9090"]
+  }
+
+  source_ranges = [
+    "35.191.0.0/16",   
+    "130.211.0.0/22"
+  ]
+
+  target_tags = ["jenkins"]
+}
+
+resource "google_compute_instance_group" "jenkins_group" {
+  name      = "jenkins-group"
+  zone      = var.zone
+  instances = [google_compute_instance.jenkins.self_link]
+
+  named_port {
+    name = var.jenkins_service_name
+    port = var.jenkins_port
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name = "jenkins-health-check"
+
+  http_health_check {
+    port         = var.jenkins_port
+    request_path = var.health_check_path 
+  }
+}
