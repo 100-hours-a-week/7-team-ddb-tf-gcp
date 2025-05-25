@@ -69,6 +69,12 @@ locals {
   fe_tag = "fe" 
 
   ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
+
+  dockercompose_content = file("${path.module}/files/docker-compose.yml")
+  rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
+    name                  = "monitoring"
+    dockercompose_content = local.dockercompose_content
+  })
 }
 
 # FE 인스턴스 생성
@@ -100,7 +106,7 @@ resource "google_compute_instance" "fe" {
     ENV_LABEL = var.env
   }
 
-  metadata_startup_script = file("${path.module}/scripts/startup.sh")
+  metadata_startup_script = local.rendered_startup_script
 
   tags = [local.fe_tag, var.private_route_tag]
 

@@ -56,4 +56,10 @@ sudo cp /home/peter/.docker/config.json /root/.docker/config.json
 echo "▶ peter 계정에 docker 그룹 권한 부여"
 sudo usermod -aG docker peter
 
+echo "▶ docker compose 실행"
+cd /tmp
+echo "${dockercompose_content}" > /tmp/docker-compose.yml
+
+sudo docker compose up -d
+
 echo "✅ startup.sh 완료"
