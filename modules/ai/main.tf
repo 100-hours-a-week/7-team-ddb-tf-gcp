@@ -63,6 +63,12 @@ locals {
   ai_tag = "ai"
 
   ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
+
+  dockercompose_content = file("${path.module}/files/docker-compose.yml")
+  rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
+    name                  = "monitoring"
+    dockercompose_content = local.dockercompose_content
+  })
 }
 
 # FastAPI 백엔드 인스턴스
@@ -102,7 +108,7 @@ resource "google_compute_instance" "ai" {
     ENV_LABEL = var.env
   }
   allow_stopping_for_update = true
-  metadata_startup_script = file("${path.module}/scripts/startup.sh")
+  metadata_startup_script   = local.rendered_startup_script
 
   depends_on = [
     google_service_account.ai,
