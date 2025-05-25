@@ -67,6 +67,15 @@ resource "google_project_iam_member" "jenkins_artifact_registry_writer" {
   depends_on = [google_service_account.jenkins]
 }
 
+# GCS 버킷에 objectAdmin 권한 부여
+resource "google_storage_bucket_iam_member" "jenkins_gcs_object_admin" {
+  bucket = "backup-dolpin-dev"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.jenkins.email}"
+
+  depends_on = [google_service_account.jenkins]
+}
+
 # Jenkins 외부 고정 IP
 resource "google_compute_address" "jenkins" {
   name = "jenkins-ip-${var.env}"
@@ -125,7 +134,7 @@ resource "google_compute_firewall" "jenkins" {
   direction     = "INGRESS"
   source_ranges = var.allowed_ssh_cidrs
 }
-
+  
 resource "google_compute_firewall" "jenkins_to_monitoring" {
   name      = "ssh-from-shared-to-ai-${var.env}"
   network   = var.network
@@ -138,4 +147,41 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
 
   source_tags = [local.jenkins_tag]
   target_tags = ["mon"]
+}
+resource "google_compute_firewall" "lb_to_jenkins" {
+  name    = "allow-lb-to-jenkins"
+  network = var.network
+
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports    = ["9090"]
+  }
+
+  source_ranges = [
+    "35.191.0.0/16",   
+    "130.211.0.0/22"
+  ]
+
+  target_tags = ["jenkins"]
+}
+
+resource "google_compute_instance_group" "jenkins_group" {
+  name      = "jenkins-group"
+  zone      = var.zone
+  instances = [google_compute_instance.jenkins.self_link]
+
+  named_port {
+    name = var.jenkins_service_name
+    port = var.jenkins_port
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name = "jenkins-health-check"
+
+  http_health_check {
+    port         = var.jenkins_port
+    request_path = var.health_check_path 
+  }
 }

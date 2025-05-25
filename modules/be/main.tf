@@ -1,6 +1,6 @@
 # BE 서비스 계정 생성 및 권한 부여
 resource "google_service_account" "be" {
-  account_id   = "backend2"
+  account_id   = "backend-${var.env}"
   display_name = "backend Service Account"
   project      = var.project_id
 }

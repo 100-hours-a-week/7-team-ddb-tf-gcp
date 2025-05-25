@@ -40,8 +40,28 @@ module "jenkins" {
   project_id            = var.project_id
   ssh_users             = var.ssh_users
   allowed_ssh_cidrs     = var.allowed_ssh_cidrs
+  jenkins_service_name  = var.jenkins_service_name
+  jenkins_port          = var.jenkins_port
+  health_check_path     = var.health_check_path
 }
 
+module "dns" {
+  source                       = "../../modules/dns"
+  cdn_backend_bucket_self_link = ""
+  env                          = var.env
+  dns_managed_zone             = var.dns_zone_name
+  fallback_service_key         = var.jenkins_service_name
+  domains                      = [var.jenkins_domain]
+  network                      = module.network.vpc_self_link
+  services = {
+    (var.jenkins_service_name) : {
+      domain         = var.jenkins_domain
+      instance_group = module.jenkins.jenkins_group
+      health_check   = module.jenkins.health_check
+      port_name      = var.jenkins_service_name
+    }
+  }
+}
 module "monitoring" {
   source              = "./modules/monitoring"
   machine_type        = var.monitoring_instance_type

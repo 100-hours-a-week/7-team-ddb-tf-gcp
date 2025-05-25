@@ -64,6 +64,7 @@ variable "jenkins_zone" {
   default     = "asia-northeast3-a"
 }
 
+
 variable "monitoring_instance_type" {
   description = "모니터링 인스턴스 타입"
   type        = string
@@ -100,4 +101,34 @@ variable "zone" {
   description = "인스턴스가 위치할 zone"
   type        = string
   default     = "asia-northeast3-a"
+}
+
+variable "dns_zone_name" {
+  type        = string
+  description = "dns managed zone 이름"
+  default     = "dolpin"
+}
+
+variable "jenkins_service_name" {
+  type        = string
+  description = "jenkins 서비스 이름"
+  default     = "jenkins"
+}
+
+variable "jenkins_domain" {
+  type        = string
+  description = "jenkins domain name"
+  default     = "jenkins.dolpin.site"
+}
+
+variable "jenkins_port" {
+  type        = string
+  description = "jenkins service port"
+  default     = "9090"
+}
+
+variable "health_check_path" {
+  type        = string
+  description = "Jenkins instance의 health check 주소"
+  default     = "/login"
 }
