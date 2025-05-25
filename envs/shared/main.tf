@@ -8,7 +8,7 @@ terraform {
   }
   backend "gcs" {
     bucket      = "dolpin-terraform-state-29m1t350"
-    prefix     = "shared"
+    prefix      = "shared"
     credentials = "../../secrets/account.json"
   }
 }
@@ -40,4 +40,17 @@ module "jenkins" {
   project_id            = var.project_id
   ssh_users             = var.ssh_users
   allowed_ssh_cidrs     = var.allowed_ssh_cidrs
+}
+
+module "monitoring" {
+  source              = "./modules/monitoring"
+  machine_type        = var.monitoring_instance_type
+  instance_monitoring = var.instance_monitoring
+  zone                = var.zone
+  public_key          = module.jenkins.jenkins_public_key
+  env                 = var.env
+  network             = module.network.vpc_self_link
+  subnetwork          = module.network.subnet_self_links[var.public_service_name]
+  ssh_users           = var.ssh_users
+  project_id          = var.project_id
 }
