@@ -78,7 +78,11 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
       entrypoint = "bash"
       args = [
         "-c",
-        "git clone --branch=$${_BRANCH} --single-branch ${var.repo_url} repo"
+        <<-EOF
+        git clone --branch=$${_BRANCH} --single-branch ${var.repo_url} repo
+        git clone --branch=main --single-branch ${var.repo_url} prod
+        git clone --branch=dev --single-branch ${var.repo_url} dev
+        EOF
       ]
     }
     # Secret 세팅
@@ -89,11 +93,17 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         "-c",
         <<-EOF
           # 클론 전에 워크스페이스 생성
-          mkdir -p /workspace/repo/secrets
+          mkdir -p /workspace/repo/secrets \
+          /workspace/dev/secrets \
+          /workspace/prod/secrets
+
           # Secret Manager 에서 키 가져오기
           gcloud secrets versions access latest --secret="${var.account_key_name}" \
-            --format='get(payload.data)' | tr '_-' '/+' | base64 -d \
-            > repo/secrets/account.json
+            --format='get(payload.data)' | tr '_-' '/+' | base64 -d | \
+            tee /workspace/repo/secrets/account.json \
+            /workspace/dev/secrets/account.json \
+            /workspace/prod/secrets/account.json \
+            > /dev/null
         EOF
       ]
     }
@@ -129,7 +139,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         EOF
       ]
     }
-
+    
     step {
       name       = "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
       entrypoint = "bash"
@@ -167,8 +177,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         <<-EOF
         set -e
         if [ "$${_ACTION}" = "apply" ]; then
-          git clone --branch=prod --single-branch ${var.repo_url} repo2
-          cd repo2/envs/shared && terraform apply -auto-approve
+          cd /workspace/prod/envs/shared && terraform apply -auto-approve
         fi
         EOF
       ]
@@ -198,18 +207,17 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         set -e
         if [ "$${_ACTION}" = "destroy" ]; then
           BOTH_DESTROYED=true
-          git clone --branch=prod --single-branch ${var.repo_url} repo2
-          cd repo2/envs/shared
-          for ENV in prod dev; do
-            cd ../$${ENV}
+          cd /workspace/prod/envs/prod
+          terraform init -input=false
+          PROD_COUNT=$$(terraform state list | wc -l)
+          cd /workspace/dev/envs/dev
+          terraform init -input=false
+          DEV_COUNT=$$(terraform state list | wc -l)
+          if [ "$$PROD_COUNT" -eq 0 ] && [ "$$DEV_COUNT" -eq 0 ]; then
+            cd /workspace/prod/envs/shared
             terraform init -input=false
-            COUNT=$$(terraform state list | wc -l)
-            if [ "$${COUNT}" -gt 0 ]; then
-              BOTH_DESTROYED=false
-              break
-            fi
-          if [ "$${BOTH_DESTROYED}" = true ]; then
-            cd ../shared && terraform destroy -auto-approve
+            terraform destroy -auto-approve
+          fi
         fi
         EOF
       ]
@@ -244,7 +252,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
       ]
     }
 
-    timeout = "1200s"
+    timeout = "1800s"
   }
 }
 
