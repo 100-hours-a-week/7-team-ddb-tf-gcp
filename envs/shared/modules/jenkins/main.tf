@@ -65,6 +65,15 @@ resource "google_project_iam_member" "jenkins_artifact_registry_writer" {
   depends_on = [google_service_account.jenkins]
 }
 
+# GCS 버킷에 objectAdmin 권한 부여
+resource "google_storage_bucket_iam_member" "jenkins_gcs_object_admin" {
+  bucket = "backup-dolpin-dev"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.jenkins.email}"
+
+  depends_on = [google_service_account.jenkins]
+}
+
 # Jenkins 외부 고정 IP
 resource "google_compute_address" "jenkins" {
   name = "jenkins-ip-${var.env}"
