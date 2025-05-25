@@ -1,6 +1,6 @@
 # AI 서비스 계정 생성 및 권한 부여
 resource "google_service_account" "ai" {
-  account_id   = "ai-service"
+  account_id   = "ai-service-${var.env}"
   display_name = "ai Service Account"
   project      = var.project_id
 }

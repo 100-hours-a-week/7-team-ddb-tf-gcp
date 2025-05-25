@@ -1,6 +1,6 @@
 # FE 서비스 계정 생성 및 권한 부여
 resource "google_service_account" "fe" {
-  account_id   = "frontend"
+  account_id   = "frontend-${var.env}"
   display_name = "Frontend Service Account"
   project      = var.project_id
 }
