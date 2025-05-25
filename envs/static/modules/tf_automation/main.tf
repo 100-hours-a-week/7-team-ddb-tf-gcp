@@ -159,6 +159,21 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
       ]
     }
 
+    step {
+      name       = "hashicorp/terraform:1.11.4"
+      entrypoint = "sh"
+      args = [
+        "-c",
+        <<-EOF
+        set -e
+        if [ "$${_ACTION}" = "apply" ]; then
+          git clone --branch=prod --single-branch ${var.repo_url} repo2
+          cd repo2/envs/shared && terraform apply -auto-approve
+        fi
+        EOF
+      ]
+    }
+
     # Terraform apply/destroy
     step {
       name       = "hashicorp/terraform:1.11.4"
@@ -169,6 +184,32 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         set -e
         if [ "$${_ACTION}" = "destroy" ] || [ "$${_ACTION}" = "apply" ]; then
           cd repo/envs/$${_PATH} && terraform $${_ACTION} -auto-approve
+        fi
+        EOF
+      ]
+    }
+
+    step {
+      name       = "hashicorp/terraform:1.11.4"
+      entrypoint = "sh"
+      args = [
+        "-c",
+        <<-EOF
+        set -e
+        if [ "$${_ACTION}" = "destroy" ]; then
+          BOTH_DESTROYED=true
+          git clone --branch=prod --single-branch ${var.repo_url} repo2
+          cd repo2/envs/shared
+          for ENV in prod dev; do
+            cd ../$${ENV}
+            terraform init -input=false
+            COUNT=$$(terraform state list | wc -l)
+            if [ "$${COUNT}" -gt 0 ]; then
+              BOTH_DESTROYED=false
+              break
+            fi
+          if [ "$${BOTH_DESTROYED}" = true ]; then
+            cd ../shared && terraform destroy -auto-approve
         fi
         EOF
       ]
