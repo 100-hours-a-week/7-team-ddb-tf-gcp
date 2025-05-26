@@ -83,6 +83,7 @@ resource "google_compute_global_forwarding_rule" "https" {
 }
 
 resource "google_compute_url_map" "redirect_map" {
+  count = var.env == "prod" ? 1 : 0
   name = "redirect-map-${var.env}"
   default_url_redirect {
     https_redirect         = true
@@ -92,16 +93,18 @@ resource "google_compute_url_map" "redirect_map" {
 }
 
 resource "google_compute_target_http_proxy" "redirect" {
+  count = var.env == "prod" ? 1 : 0
   name    = "redirect-proxy-${var.env}"
-  url_map = google_compute_url_map.redirect_map.self_link
+  url_map = google_compute_url_map.redirect_map[0].self_link
 }
 
 resource "google_compute_global_forwarding_rule" "redirect" {
+  count = var.env == "prod" ? 1 : 0
   name                  = "redirect-fw-${var.env}"
   load_balancing_scheme = "EXTERNAL"
   ip_address            = google_compute_global_address.lb_ip.address
   port_range            = "80"
-  target                = google_compute_target_http_proxy.redirect.self_link
+  target                = google_compute_target_http_proxy.redirect[0].self_link
 }
 
 resource "google_compute_firewall" "lb_to_instances" {
