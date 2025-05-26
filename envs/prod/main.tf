@@ -39,12 +39,12 @@ module "dns" {
   fallback_service_key         = var.be_service_name
   domains                      = [var.be_domain, var.bucket_domain, var.ai_domain, var.fe_domain]
   network                      = module.network.vpc_self_link
-  services = { 
+  services = {
     (var.be_service_name) : {
-    domain         = var.be_domain
-    instance_group = module.be.instance_group
-    health_check   = module.be.health_check
-    port_name      = var.be_service_name
+      domain         = var.be_domain
+      instance_group = module.be.instance_group
+      health_check   = module.be.health_check
+      port_name      = var.be_service_name
     }
     (var.bucket_service_name) : {
       domain         = var.bucket_domain
@@ -66,6 +66,7 @@ module "dns" {
     }
   }
 }
+
 
 module "be" {
   source               = "../../modules/be"
@@ -99,7 +100,6 @@ module "cloudsql" {
 
 module "cloud_storage" {
   source = "../../modules/cloud_storage"
-
   env                            = var.env
   bucket_name                    = var.bucket_name
   location                       = "ASIA"

@@ -75,7 +75,6 @@ variable "dns_zone_name" {
   description = "dns managed zone 이름"
   default     = "dolpin"
 }
-
 //be 변수
 variable "be_service_name" {
   type        = string
@@ -128,7 +127,6 @@ variable "db_name" {
   description = "backend instance의 health check 주소"
   default     = "dolpin"
 }
-
 // bucket
 variable "bucket_name" {
   type        = string

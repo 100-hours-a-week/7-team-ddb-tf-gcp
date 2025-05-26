@@ -123,6 +123,7 @@ variable "db_user" {
   description = "backend service port"
   default     = "dolpinuser"
 }
+
 variable "db_name" {
   type        = string
   description = "backend instance의 health check 주소"

@@ -20,7 +20,6 @@ provider "registry.terraform.io/hashicorp/google" {
     "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
   ]
 }
-
 provider "registry.terraform.io/hashicorp/random" {
   version = "3.7.2"
   hashes = [
@@ -39,7 +38,6 @@ provider "registry.terraform.io/hashicorp/random" {
     "zh:eac7b63e86c749c7d48f527671c7aee5b4e26c10be6ad7232d6860167f99dbb0",
   ]
 }
-
 provider "registry.terraform.io/hashicorp/tls" {
   version = "4.1.0"
   hashes = [

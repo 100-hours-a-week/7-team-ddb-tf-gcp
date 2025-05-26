@@ -52,7 +52,6 @@ variable "cloudsql_ip_address" {
   description = "cloudsql의 public ip"
   type = string
 }
-
 variable "shared_vpc_cidr" {
   description = "Shared VPC CIDR block (Bastion, Jenkins가 속한 네트워크 대역)"
   type        = string

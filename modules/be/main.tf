@@ -146,7 +146,7 @@ resource "google_compute_firewall" "lb_to_be" {
     "130.211.0.0/22",
     "35.191.0.0/16",
   ]
-  target_tags   = [local.be_tag]
+  target_tags = [local.be_tag]
 }
 
 resource "google_compute_firewall" "be_to_cloudsql_public" {
