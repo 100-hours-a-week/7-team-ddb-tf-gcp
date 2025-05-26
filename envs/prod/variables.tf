@@ -52,6 +52,12 @@ variable "ai_cidr" {
   default     = "10.10.40.0/24"
 }
 
+variable "shared_vpc_cidr" {
+  type        = string
+  description = "value"
+  default     = "10.30.10.0/24"    
+}
+
 variable "public_tag" {
   type        = string
   description = "public 환경 tag"
@@ -69,32 +75,6 @@ variable "dns_zone_name" {
   description = "dns managed zone 이름"
   default     = "dolpin"
 }
-
-//nat_bastion 변수
-variable "nat_bastion_instance_type" {
-  type        = string
-  description = "nat_bastion instance 종류"
-  default     = "g1-small"
-}
-
-variable "nat_bastion_allowed_ssh_cidrs" {
-  type        = list(string)
-  description = "nat_bastion에 접근가능한 ssh cidr 리스트"
-  default     = ["0.0.0.0/0"]
-}
-
-variable "nat_bastion_ssh_users" {
-  type        = list(string)
-  description = "nat_bastion에 접근가능한 ssh 유저 리스트"
-  default     = ["peter", "lily", "eric", "suzy", "juny", "jensen"]
-}
-
-variable "nat_bastion_zone" {
-  type        = string
-  description = "nat_bastion이 위치할 zone"
-  default     = "asia-northeast3-a"
-}
-
 //be 변수
 variable "be_service_name" {
   type        = string
@@ -142,11 +122,6 @@ variable "db_user" {
   description = "backend service port"
   default     = "dolpinuser"
 }
-variable "db_password" {
-  type        = string
-  description = "backend가 사용할 instance type"
-  default     = "0205"
-}
 variable "db_name" {
   type        = string
   description = "backend instance의 health check 주소"
@@ -161,7 +136,7 @@ variable "bucket_name" {
 variable "backend_service_account_email" {
   type        = string
   description = "backend 서비스 계정 이메일"
-  default     = "backend@velvety-calling-458402-c1.iam.gserviceaccount.com"
+  default     = "backend2@velvety-calling-458402-c1.iam.gserviceaccount.com"
 }
 variable "bucket_service_name" {
   type        = string
@@ -266,4 +241,80 @@ variable "backup_bucket_name" {
   type = string
   description = "백업할 bucket 이름"
   default = "static-backup-bucket"
+}
+
+// vpc peering
+variable "shared_name_prefix" {
+  description = "VPC 이름 prefix for shared"
+  type        = string
+  default     = "shared"
+}
+
+variable "allowed_ports" {
+  description = "허용할 포트 목록"
+  type        = list(string)
+  default     = ["22"]
+}
+
+variable "create_firewall" {
+  description = "firewall 리소스를 생성할지 여부"
+  type        = bool
+  default     = true
+}
+
+variable "export_custom_routes" {
+  description = "peering에서 custom route를 export할지 여부"
+  type        = bool
+  default     = true
+}
+
+variable "import_custom_routes" {
+  description = "peering에서 custom route를 import할지 여부"
+  type        = bool
+  default     = true
+}
+
+// gar
+variable "gar_location" {
+  description = "GAR 위치 (region)"
+  type        = string
+  default     = "asia-northeast3"
+}
+
+variable "gar_format" {
+  description = "GAR 저장소 형식 (예: DOCKER, MAVEN)"
+  type        = string
+  default     = "DOCKER"
+}
+
+variable "immutable_tags" {
+  description = "Docker tag를 immutable하게 설정할지 여부"
+  type        = bool
+  default     = true
+}
+
+variable "cleanup_policies" {
+  description = "Artifact Registry의 이미지 정리 정책 목록"
+  type = list(object({
+    id       = string
+    action   = string
+    condition = any
+  }))
+  default = [
+    {
+      id     = "delete-untagged"
+      action = "DELETE"
+      condition = {
+        tag_state = "UNTAGGED"
+      }
+    },
+    {
+      id     = "delete-old-tagged"
+      action = "DELETE"
+      condition = {
+        tag_state  = "TAGGED"
+        older_than = "30d"
+      }
+    }
+  ]
 }

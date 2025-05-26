@@ -12,3 +12,7 @@ output "port_name" {
   description = "Named port key for BE"
   value       = var.ig_port_name
 }
+
+output "service_account_email" {
+  value = google_service_account.be.email
+}
