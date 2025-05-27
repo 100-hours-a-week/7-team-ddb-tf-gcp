@@ -62,6 +62,7 @@ module "dns" {
     }
   }
 }
+
 module "monitoring" {
   source              = "./modules/monitoring"
   machine_type        = var.monitoring_instance_type
