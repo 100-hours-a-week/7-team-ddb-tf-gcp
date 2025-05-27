@@ -136,7 +136,7 @@ resource "google_compute_firewall" "jenkins" {
 }
   
 resource "google_compute_firewall" "jenkins_to_monitoring" {
-  name      = "ssh-from-shared-to-ai-${var.env}"
+  name      = "jenkins-to-monitoring-${var.env}"
   network   = var.network
   direction = "INGRESS"
 
