@@ -45,3 +45,8 @@ variable "project_id" {
   type        = string
   description = "GCP Project ID"
 }
+
+variable "service_name" {
+  type = string
+  description = "monitoring 서비스 이름"
+}

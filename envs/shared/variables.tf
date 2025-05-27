@@ -132,3 +132,15 @@ variable "health_check_path" {
   description = "Jenkins instance의 health check 주소"
   default     = "/login"
 }
+
+variable "monitoring_service_name" {
+  type        = string
+  description = "jenkins 서비스 이름"
+  default     = "monitoring"
+}
+
+variable "monitoring_domain" {
+  type        = string
+  description = "jenkins domain name"
+  default     = "monitoring.dolpin.site"
+}

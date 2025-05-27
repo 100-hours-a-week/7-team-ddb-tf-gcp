@@ -60,8 +60,15 @@ module "dns" {
       health_check   = module.jenkins.health_check
       port_name      = var.jenkins_service_name
     }
+    (var.monitoring_service_name) : {
+      domain         = var.monitoring_domain
+      instance_group = module.monitoring.monitoring_group
+      health_check   = module.monitoring.health_check
+      port_name      = var.monitoring_domain
+    }
   }
 }
+
 module "monitoring" {
   source              = "./modules/monitoring"
   machine_type        = var.monitoring_instance_type
@@ -73,4 +80,5 @@ module "monitoring" {
   subnetwork          = module.network.subnet_self_links[var.public_service_name]
   ssh_users           = var.ssh_users
   project_id          = var.project_id
+  service_name        = var.monitoring_service_name
 }
