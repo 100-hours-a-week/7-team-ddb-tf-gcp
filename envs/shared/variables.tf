@@ -64,6 +64,45 @@ variable "jenkins_zone" {
   default     = "asia-northeast3-a"
 }
 
+
+variable "monitoring_instance_type" {
+  description = "모니터링 인스턴스 타입"
+  type        = string
+  default     = "n1-standard-1"
+}
+
+variable "instance_monitoring" {
+  description = "모니터링 ingress firewall 정의. key: 서비스 이름, value: 서비스 cidrs 및 허용할 포트"
+  type = map(object({
+    cidrs = list(string)
+    ports = list(string)
+  }))
+  default = {
+    "fe" = {
+      cidrs  = ["10.20.20.0/24", "10.10.20.0/24"]
+      ports = ["9100"]
+    }
+    "be" = {
+      cidrs = ["10.20.30.0/24", "10.10.30.0/24"]
+      ports = ["9100", "8081"]
+    }
+    "ai" = {
+      cidrs  = ["10.20.40.0/24", "10.10.40.0/24"]
+      ports = ["9100"]
+    }
+    "shared" = {
+      cidrs  = ["10.30.10.0/24" ]
+      ports = ["9100"]
+    }
+  }
+}
+
+variable "zone" {
+  description = "인스턴스가 위치할 zone"
+  type        = string
+  default     = "asia-northeast3-a"
+}
+
 variable "dns_zone_name" {
   type        = string
   description = "dns managed zone 이름"

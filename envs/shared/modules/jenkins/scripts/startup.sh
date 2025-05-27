@@ -45,7 +45,9 @@ sudo apt-get install -y google-cloud-cli
 
 # [3] Dockerfile 직접 생성
 echo "${dockerfile_content}" > /tmp/Dockerfile
+echo "${dockercompose_content}" > /tmp/docker-compose.yml
 cd /tmp
+sudo docker compose up -d
 sudo docker build -t custom-jenkins:gcloud .
 
 # [4] Jenkins 컨테이너 볼륨 준비 및 백업 복원

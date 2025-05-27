@@ -66,6 +66,12 @@ locals {
   be_tag = "be" 
 
   ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
+
+  dockercompose_content = file("${path.module}/files/docker-compose.yml")
+  rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
+    name                  = "monitoring"
+    dockercompose_content = local.dockercompose_content
+  })
 }
 
 // be instance 생성
@@ -107,7 +113,7 @@ resource "google_compute_instance" "be" {
     ENV_LABEL = var.env
   }
 
-  metadata_startup_script = file("${path.module}/scripts/startup.sh")
+  metadata_startup_script = local.rendered_startup_script
 
   depends_on = [
     google_service_account.be,
@@ -126,7 +132,7 @@ resource "google_compute_firewall" "ssh_from_shared_to_be" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["22", "9100", "8081"]
   }
 
   source_ranges = [var.shared_vpc_cidr]  
