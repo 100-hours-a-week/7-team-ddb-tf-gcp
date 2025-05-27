@@ -64,7 +64,7 @@ module "dns" {
       domain         = var.monitoring_domain
       instance_group = module.monitoring.monitoring_group
       health_check   = module.monitoring.health_check
-      port_name      = var.monitoring_domain
+      port_name      = var.monitoring_service_name
     }
   }
 }

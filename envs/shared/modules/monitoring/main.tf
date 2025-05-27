@@ -95,7 +95,7 @@ resource "google_compute_firewall" "lb_to_monitoring" {
   direction = "INGRESS"
   allow {
     protocol = "tcp"
-    ports    = ["9090"]
+    ports    = ["3000"]
   }
 
   source_ranges = [
