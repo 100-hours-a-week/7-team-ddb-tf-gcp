@@ -8,9 +8,6 @@ positions:
 clients:
   - url: http://10.30.10.3:3100/loki/api/v1/push  # IP 주소 및 경로가 올바른지 확인 필요
 
-external_labels:
-  env: "${env}"
-
 scrape_configs:
   - job_name: spring-info-log
     static_configs:
@@ -19,6 +16,7 @@ scrape_configs:
         labels:
           job: spring-info-log
           compose_service: dolpin
+          env: "${env}"
           __path__: /var/log/spring/dolpin-info*.log
     pipeline_stages:
       - regex:
@@ -26,7 +24,7 @@ scrape_configs:
       - timestamp:
           source: ts
           format: "2006-01-02 15:04:05.000"
-          location: Asia/Seoul
+          location: UTC
       - labels:
           level:
           thread:
@@ -43,6 +41,7 @@ scrape_configs:
         labels:
           job: spring-error-log
           compose_service: dolpin
+          env: "${env}"
           __path__: /var/log/spring/dolpin-error*.log
     pipeline_stages:
       - regex:
@@ -50,7 +49,7 @@ scrape_configs:
       - timestamp:
           source: ts
           format: "2006-01-02 15:04:05.000"
-          location: Asia/Seoul
+          location: UTC
       - labels:
           level:
           thread:
@@ -67,6 +66,7 @@ scrape_configs:
         labels:
           job: spring-warn-log
           compose_service: dolpin
+          env: "${env}"
           __path__: /var/log/spring/dolpin-warn*.log
     pipeline_stages:
       - regex:
@@ -74,7 +74,7 @@ scrape_configs:
       - timestamp:
           source: ts
           format: "2006-01-02 15:04:05.000"
-          location: Asia/Seoul
+          location: UTC
       - labels:
           level:
           thread:
@@ -91,6 +91,7 @@ scrape_configs:
         labels:
           job: spring-debug-log
           compose_service: dolpin
+          env: "${env}"
           __path__: /var/log/spring/dolpin-debug*.log
     pipeline_stages:
       - regex:
@@ -98,7 +99,7 @@ scrape_configs:
       - timestamp:
           source: ts
           format: "2006-01-02 15:04:05.000"
-          location: Asia/Seoul
+          location: UTC
       - labels:
           level:
           thread:
@@ -115,6 +116,7 @@ scrape_configs:
         labels:
           job: spring-all-log
           compose_service: dolpin
+          env: "${env}"
           __path__: /var/log/spring/dolpin-all*.log
     pipeline_stages:
       - regex:
@@ -122,7 +124,7 @@ scrape_configs:
       - timestamp:
           source: ts
           format: "2006-01-02 15:04:05.000"
-          location: Asia/Seoul
+          location: UTC
       - labels:
           level:
           thread:
