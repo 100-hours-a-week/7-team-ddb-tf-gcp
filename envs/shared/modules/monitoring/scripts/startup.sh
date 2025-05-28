@@ -19,5 +19,9 @@ sudo chmod 666 /var/run/docker.sock
 cd /tmp
 echo "${dockercompose_content}" > /tmp/docker-compose.yml
 echo "${prometheus_content}" > /tmp/prometheus.yml
+echo "${loki_content}" > /tmp/loki.yml
+
+mkdir -p loki-data
+sudo chown -R 10001:10001 loki-data
 
 docker compose up -d
