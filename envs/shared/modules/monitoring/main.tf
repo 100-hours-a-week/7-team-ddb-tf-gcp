@@ -87,3 +87,47 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
   source_tags = ["jenkins"]
   target_tags = [local.mon_tag]
 }
+
+resource "google_compute_firewall" "lb_to_monitoring" {
+  name    = "allow-lb-to-monitoring"
+  network = var.network
+
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports    = ["3000"]
+  }
+
+  source_ranges = [
+    "35.191.0.0/16",   
+    "130.211.0.0/22"
+  ]
+
+  target_tags = [local.mon_tag]
+}
+
+resource "google_compute_instance_group" "monitoring_group" {
+  name      = "monitoring-group"
+  zone      = var.zone
+  instances = [google_compute_instance.monitoring.self_link]
+
+  named_port {
+    name = var.service_name
+    port = "3000"
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name = "monitoring-health-check"
+
+  http_health_check {
+    port         = "3000"
+    request_path = "/api/health"
+  }
+}
+
+resource "google_project_iam_member" "monitoring_sa_secret_accessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.monitoring.email}"
+}
