@@ -65,6 +65,11 @@ locals {
   ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
 
   dockercompose_content = file("${path.module}/files/docker-compose.yml")
+
+  promtail_content      = templatefile("${path.module}/files/promtail.yml", {
+    env = var.env
+  })
+  
   rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
     name                  = "monitoring"
     dockercompose_content = local.dockercompose_content

@@ -1,0 +1,32 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0  # gRPC 비활성화
+
+positions:
+  filename: /var/log/loki/positions.yaml
+
+clients:
+  - url: http://10.30.10.3:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: fastapi-app-log
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: fastapi-app-log
+          compose_service: dolpin
+          env: "${env}"
+          __path__: /var/log/fastapi/app.log 
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - (?P<app>[^ ]+) - (?P<level>[A-Z]+) - (?P<msg>.*)'
+      - timestamp:
+          source: ts
+          format: "2006-01-02 15:04:05,000"
+          location: UTC
+      - labels:
+          app:
+          level:
+      - output:
+          source: msg
