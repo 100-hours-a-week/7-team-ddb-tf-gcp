@@ -10,7 +10,23 @@ scrape_configs:
         zone: asia-northeast3-a
         port: 8081
         filter: 'labels.component="be"'
+    relabel_configs:
+      - action: replace
+        source_labels: [__meta_gce_instance_name]
+        target_label: application
 
+  - job_name: 'fastapi-gce'
+    metrics_path: '/metrics'
+    gce_sd_configs:
+      - project: velvety-calling-458402-c1
+        zone: asia-northeast3-a
+        port: 8000
+        filter: 'labels.component="ai"'
+    relabel_configs:
+      - action: replace
+        source_labels: [__meta_gce_instance_name]
+        target_label: application
+        
   - job_name: 'node-exporter-gce'
     gce_sd_configs:
       - project: velvety-calling-458402-c1
