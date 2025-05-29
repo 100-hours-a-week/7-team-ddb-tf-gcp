@@ -18,3 +18,23 @@ provider "google" {
   project     = var.project_id
   region      = var.region
 }
+
+module "network" {
+  source           = "../../modules/network"
+  public_route_tag = var.public_tag
+  subnets = {
+    (var.public_service_name) : { cidr : var.public_cidr }
+  }
+  env = var.env
+}
+
+module "k6" {
+  source                = "./modules/k6"
+  env                   = var.env
+  zone                  = var.k6_zone
+  machine_type          = var.machine_type
+  network               = module.network.vpc_self_link
+  subnetwork            = module.network.subnet_self_links[var.public_service_name]
+  instance_tag          = var.public_tag
+  ssh_users             = var.ssh_users
+}
