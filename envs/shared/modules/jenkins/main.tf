@@ -145,8 +145,8 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
     ports    = ["9100"]
   }
 
-  source_tags = [local.jenkins_tag]
-  target_tags = ["mon"]
+  source_tags = [var.mon_tag]
+  target_tags = ["jenkins"]
 }
 resource "google_compute_firewall" "lb_to_jenkins" {
   name    = "allow-lb-to-jenkins"
