@@ -50,8 +50,8 @@ resource "google_project_iam_member" "ai_artifact_registry_reader" {
 
 # Jenkins 공개키를 AI가 사용하기 위한 설정
 data "google_secret_manager_secret_version" "jenkins_pubkey" {
-  secret = "jenkins-ssh-key-shared"
-  version = "latest"
+  secret     = "jenkins-ssh-key-shared"
+  version    = "latest"
   depends_on = [google_secret_manager_secret_iam_member.ai_secret_access_to_jenkins_key]
 }
 
@@ -62,17 +62,16 @@ data "tls_public_key" "jenkins_pubkey" {
 locals {
   ai_tag = "ai"
 
-  ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
-
+  ssh_key_entries = [for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}"]
   dockercompose_content = file("${path.module}/files/docker-compose.yml")
-
-  promtail_content      = templatefile("${path.module}/files/promtail.yml", {
+  promtail_content = templatefile("${path.module}/files/promtail.yml", {
     env = var.env
   })
-  
+
   rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
     name                  = "monitoring"
     dockercompose_content = local.dockercompose_content
+    promtail_content      = local.promtail_content
   })
 }
 
@@ -109,7 +108,7 @@ resource "google_compute_instance" "ai" {
   }
 
   metadata = {
-    ssh-keys = join("\n", local.ssh_key_entries)
+    ssh-keys  = join("\n", local.ssh_key_entries)
     ENV_LABEL = var.env
   }
   allow_stopping_for_update = true
@@ -132,10 +131,10 @@ resource "google_compute_firewall" "ssh_from_shared_to_ai" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "9100"]
+    ports    = ["22", "9100", "8000"]
   }
 
-  source_ranges = [var.shared_vpc_cidr]  
+  source_ranges = [var.shared_vpc_cidr]
   target_tags   = [local.ai_tag]
 }
 
@@ -174,6 +173,6 @@ resource "google_compute_health_check" "ai" {
 
   http_health_check {
     port         = var.ai_port
-    request_path = var.health_check_path 
+    request_path = var.health_check_path
   }
 }
