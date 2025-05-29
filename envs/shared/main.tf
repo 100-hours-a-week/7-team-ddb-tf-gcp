@@ -43,6 +43,7 @@ module "jenkins" {
   jenkins_service_name  = var.jenkins_service_name
   jenkins_port          = var.jenkins_port
   health_check_path     = var.health_check_path
+  mon_tag = module.monitoring.mon_tag
 }
 
 module "dns" {
