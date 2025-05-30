@@ -72,6 +72,33 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
     options {
       logging = "CLOUD_LOGGING_ONLY"
     }
+    # available_secrets {
+    #   secret_manager {
+    #     version_name = "projects/648295444613/secrets/jenkins-ssh-key-shared/versions/latest"
+    #     env          = "SSH_KEY"
+    #   }
+    # }
+    # step {
+    #   name       = "google/cloud-sdk:slim"
+    #   entrypoint = "bash"
+    #   secret_env = ["SSH_KEY"]
+    #   args = [
+    #     "-c",
+    #     <<-EOF
+    #     set -e
+    #     if [ "$${_ACTION}" = "destroy" ]; then
+    #       TS=$$(date +%Y%m%d_%H%M%S)
+
+    #       gcloud compute ssh mon-instance-shared \
+    #       --zone=asia-northeast3-a \
+    #       --tunnel-through-iap \
+    #       --project=velvety-calling-458402-c1 \
+    #       --quiet \
+    #       --command="ls && echo OK"
+    #     fi
+    #     EOF
+    #   ]
+    # }
     # 1) Git clone
     step {
       name       = "gcr.io/cloud-builders/git"
@@ -144,7 +171,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         EOF
       ]
     }
-    
+
     step {
       name       = "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
       entrypoint = "bash"
@@ -290,11 +317,16 @@ resource "google_pubsub_topic_iam_binding" "build_sub" {
 # Build 계정에 프로젝트 권한 일괄 부여
 resource "google_project_iam_member" "build_sa" {
   for_each = {
-    editor          = "roles/editor"
-    log_writer      = "roles/logging.logWriter"
-    secret_accessor = "roles/secretmanager.admin"
-    storage_admin   = "roles/storage.admin"
-    cloudsql_admin  = "roles/cloudsql.admin"
+    editor               = "roles/editor"
+    log_writer           = "roles/logging.logWriter"
+    secret_accessor      = "roles/secretmanager.admin"
+    storage_admin        = "roles/storage.admin"
+    cloudsql_admin       = "roles/cloudsql.admin"
+    iap_tunnel           = "roles/iap.tunnelResourceAccessor"
+    os_login             = "roles/compute.osLogin"
+    compute_admin        = "roles/compute.admin"          # VM 관리
+    service_account_user = "roles/iam.serviceAccountUser" # SA 사용
+    project_viewer       = "roles/viewer"                 # 프로젝트 읽기
   }
 
   project = var.project_id
