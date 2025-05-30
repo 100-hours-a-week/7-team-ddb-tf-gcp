@@ -113,7 +113,12 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
       entrypoint = "sh"
       args = [
         "-c",
-        "cd repo/envs/$${_PATH} && terraform init"
+        <<-EOF
+        cd /workspace/repo/envs/$${_PATH} && terraform init
+        cd /workspace/dev/envs/dev && terraform init
+        cd /workspace/prod/envs/prod && terraform init
+        cd /workspace/dev/envs/shared && terraform init
+        EOF
       ]
     }
     # Backup on destroy
@@ -177,7 +182,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         <<-EOF
         set -e
         if [ "$${_ACTION}" = "apply" ]; then
-          cd /workspace/prod/envs/shared && terraform apply -auto-approve
+          cd /workspace/dev/envs/shared && terraform apply -auto-approve
         fi
         EOF
       ]
@@ -208,14 +213,11 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         if [ "$${_ACTION}" = "destroy" ]; then
           BOTH_DESTROYED=true
           cd /workspace/prod/envs/prod
-          terraform init -input=false
           PROD_COUNT=$$(terraform state list | wc -l)
           cd /workspace/dev/envs/dev
-          terraform init -input=false
           DEV_COUNT=$$(terraform state list | wc -l)
           if [ "$$PROD_COUNT" -eq 0 ] && [ "$$DEV_COUNT" -eq 0 ]; then
-            cd /workspace/prod/envs/shared
-            terraform init -input=false
+            cd /workspace/dev/envs/shared
             terraform destroy -auto-approve
           fi
         fi
