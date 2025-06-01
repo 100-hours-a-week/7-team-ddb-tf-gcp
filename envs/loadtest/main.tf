@@ -31,10 +31,18 @@ module "network" {
 module "k6" {
   source                = "./modules/k6"
   env                   = var.env
-  zone                  = var.k6_zone
+  zone                  = var.zone
   machine_type          = var.machine_type
   network               = module.network.vpc_self_link
   subnetwork            = module.network.subnet_self_links[var.public_service_name]
   instance_tag          = var.public_tag
   ssh_users             = var.ssh_users
+}
+
+module "influxDB" {
+  source                = "./modules/influxDB"
+  env                   = var.env
+  zone                  = var.zone
+  network               = module.network.vpc_self_link
+  subnetwork            = module.network.subnet_self_links[var.public_service_name]
 }

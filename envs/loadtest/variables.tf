@@ -40,7 +40,7 @@ variable "public_tag" {
   default     = "public-k6"
 }
 
-variable "k6_zone" {
+variable "zone" {
   type        = string
   description = "k6가 위치할 zone"
   default     = "asia-northeast3-a"
