@@ -105,3 +105,9 @@ variable "backup_bucket_name" {
   description = "백업에 사용할 버킷 이름"
   default     = "static-backup-bucket"
 }
+
+variable "loki_backup_bucket_name" {
+  type = string
+  description = "로키 데이터 백업 버킷"
+  default = "loki-dolpin"
+}
