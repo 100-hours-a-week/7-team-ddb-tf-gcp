@@ -72,34 +72,6 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
     options {
       logging = "CLOUD_LOGGING_ONLY"
     }
-    # available_secrets {
-    #   secret_manager {
-    #     version_name = "projects/648295444613/secrets/jenkins-ssh-key-shared/versions/latest"
-    #     env          = "SSH_KEY"
-    #   }
-    # }
-    # step {
-    #   name       = "google/cloud-sdk:slim"
-    #   entrypoint = "bash"
-    #   secret_env = ["SSH_KEY"]
-    #   args = [
-    #     "-c",
-    #     <<-EOF
-    #     set -e
-    #     if [ "$${_ACTION}" = "destroy" ]; then
-    #       TS=$$(date +%Y%m%d_%H%M%S)
-
-    #       gcloud compute ssh mon-instance-shared \
-    #       --zone=asia-northeast3-a \
-    #       --tunnel-through-iap \
-    #       --project=velvety-calling-458402-c1 \
-    #       --quiet \
-    #       --command="ls && echo OK"
-    #     fi
-    #     EOF
-    #   ]
-    # }
-    # 1) Git clone
     step {
       name       = "gcr.io/cloud-builders/git"
       entrypoint = "bash"

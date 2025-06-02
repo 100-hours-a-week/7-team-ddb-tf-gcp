@@ -45,8 +45,7 @@ resource "google_compute_instance" "monitoring" {
   }
 
   metadata = {
-    ssh-keys = join("\n", local.ssh_key_entries)
-    enable-oslogin = "TRUE"
+    ssh-keys       = join("\n", local.ssh_key_entries)
   }
 
   metadata_startup_script = local.rendered_startup_script
@@ -80,7 +79,6 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
   }
 
   source_tags   = ["jenkins"]
-  source_ranges = ["35.235.240.0/20"]
   target_tags   = [local.mon_tag]
 }
 
