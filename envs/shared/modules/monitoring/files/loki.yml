@@ -17,7 +17,7 @@ schema_config:
   configs:
     - from: 2020-10-24
       store: boltdb-shipper
-      object_store: filesystem
+      object_store: gcs
       schema: v11
       index:
         prefix: index_
@@ -27,13 +27,13 @@ storage_config:
   boltdb_shipper:
     active_index_directory: /tmp/loki/index
     cache_location: /tmp/loki/cache
-    shared_store: filesystem
-  filesystem:
-    directory: /tmp/loki/chunks
+    shared_store: gcs
+  gcs:
+    bucket_name: loki-dolpin
 
 compactor:
   working_directory: /tmp/loki/working
-  shared_store: filesystem
+  shared_store: gcs
 
 limits_config:
   enforce_metric_name: false
