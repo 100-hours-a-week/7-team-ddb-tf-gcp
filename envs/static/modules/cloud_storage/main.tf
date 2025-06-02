@@ -1,4 +1,3 @@
-# 이미지 저장용 GCS 버킷 생성
 resource "google_storage_bucket" "bucket" {
   name     = var.bucket_name
   location = var.bucket_location
