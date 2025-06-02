@@ -111,3 +111,9 @@ variable "loki_backup_bucket_name" {
   description = "로키 데이터 백업 버킷"
   default = "loki-dolpin"
 }
+
+variable "thanos_backup_bucket_name" {
+  type = string
+  description = "로키 데이터 백업 버킷"
+  default = "thanos-dolpin"
+}
