@@ -105,3 +105,13 @@ variable "backup_bucket_name" {
   description = "백업에 사용할 버킷 이름"
   default     = "static-backup-bucket"
 }
+
+variable "db_envs" {
+  type    = set(string)
+  default = ["dev", "prod"]
+}
+
+variable "db_usernames" {
+  type        = string
+  default = "dolpinuser"
+}
