@@ -30,3 +30,9 @@ module "tf_automation" {
   envs_parameter     = var.envs_parameter
   backup_bucket_name = var.backup_bucket_name
 }
+
+module "secret" {
+  source = "./modules/secret"
+  db_envs = var.db_envs
+  db_username = var.db_usernames
+}
