@@ -117,3 +117,14 @@ variable "thanos_backup_bucket_name" {
   description = "로키 데이터 백업 버킷"
   default = "thanos-dolpin"
 }
+
+variable "db_envs" {
+  type    = set(string)
+  default = ["dev", "prod"]
+}
+
+variable "db_usernames" {
+  type        = string
+  default = "dolpinuser"
+}
+

@@ -1,0 +1,3 @@
+endpoints:
+  - address: "thanos-sidecar:19191"
+  - address: "thanos-store:19091"

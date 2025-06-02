@@ -44,3 +44,9 @@ module "thanos_backup_bucket" {
   bucket_name = var.thanos_backup_bucket_name
   bucket_location = "asia-northeast3"
 }
+  
+module "secret" {
+  source = "./modules/secret"
+  db_envs = var.db_envs
+  db_username = var.db_usernames
+}

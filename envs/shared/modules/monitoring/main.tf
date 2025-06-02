@@ -7,12 +7,6 @@ resource "google_service_account" "monitoring" {
   account_id = "monitoring-sa"
 }
 
-resource "google_project_iam_member" "monitoring_sa_compute_viewer" {
-  project = var.project_id
-  role    = "roles/compute.viewer"
-  member  = "serviceAccount:${google_service_account.monitoring.email}"
-}
-
 resource "google_compute_instance" "monitoring" {
   name         = "mon-instance-${var.env}"
   machine_type = var.machine_type
@@ -40,7 +34,7 @@ resource "google_compute_instance" "monitoring" {
 
   service_account {
     email  = google_service_account.monitoring.email
-    scopes = ["https://www.googleapis.com/auth/compute.readonly"]
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 
   labels = {
@@ -51,7 +45,7 @@ resource "google_compute_instance" "monitoring" {
   }
 
   metadata = {
-    ssh-keys = join("\n", local.ssh_key_entries)
+    ssh-keys       = join("\n", local.ssh_key_entries)
   }
 
   metadata_startup_script = local.rendered_startup_script
@@ -84,8 +78,8 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
     ports    = ["22"]
   }
 
-  source_tags = ["jenkins"]
-  target_tags = [local.mon_tag]
+  source_tags   = ["jenkins"]
+  target_tags   = [local.mon_tag]
 }
 
 resource "google_compute_firewall" "lb_to_monitoring" {
@@ -99,7 +93,7 @@ resource "google_compute_firewall" "lb_to_monitoring" {
   }
 
   source_ranges = [
-    "35.191.0.0/16",   
+    "35.191.0.0/16",
     "130.211.0.0/22"
   ]
 
@@ -126,8 +120,14 @@ resource "google_compute_health_check" "health_check" {
   }
 }
 
-resource "google_project_iam_member" "monitoring_sa_secret_accessor" {
+resource "google_project_iam_member" "monitoring_sa" {
+  for_each = {
+    secret_accessor      = "roles/secretmanager.secretAccessor"
+    storage_admin        = "roles/storage.admin"
+    compute_viewer       = "roles/compute.viewer"
+    sotrage_object_admin = "roles/storage.objectAdmin"
+  }
   project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
+  role    = each.value
   member  = "serviceAccount:${google_service_account.monitoring.email}"
 }
