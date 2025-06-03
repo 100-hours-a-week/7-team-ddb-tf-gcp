@@ -96,6 +96,7 @@ module "cloudsql" {
   db_user             = var.db_user
   backup_bucket_name  = var.backup_bucket_name
   nat_ip_address      = module.nat_gateway.nat_ip
+  project_id = var.project_id
 }
 
 module "cloud_storage" {
