@@ -1,12 +1,12 @@
 server:
   http_listen_port: 9080
-  grpc_listen_port: 0  # gRPC를 사용하지 않도록 설정
+  grpc_listen_port: 0
 
 positions:
-  filename: /var/log/loki/positions.yaml  # /tmp 대신 지속적으로 보존될 위치로 변경
+  filename: /var/log/loki/positions.yaml
 
 clients:
-  - url: http://10.30.10.3:3100/loki/api/v1/push  # IP 주소 및 경로가 올바른지 확인 필요
+  - url: http://10.30.10.3:3100/loki/api/v1/push
 
 scrape_configs:
   - job_name: spring-info-log
@@ -27,9 +27,6 @@ scrape_configs:
           location: UTC
       - labels:
           level:
-          thread:
-          userId:
-          requestId:
           logger:
       - output:
           source: msg
@@ -52,9 +49,6 @@ scrape_configs:
           location: UTC
       - labels:
           level:
-          thread:
-          userId:
-          requestId:
           logger:
       - output:
           source: msg
@@ -77,9 +71,6 @@ scrape_configs:
           location: UTC
       - labels:
           level:
-          thread:
-          userId:
-          requestId:
           logger:
       - output:
           source: msg
@@ -102,9 +93,6 @@ scrape_configs:
           location: UTC
       - labels:
           level:
-          thread:
-          userId:
-          requestId:
           logger:
       - output:
           source: msg
@@ -127,9 +115,6 @@ scrape_configs:
           location: UTC
       - labels:
           level:
-          thread:
-          userId:
-          requestId:
           logger:
       - output:
           source: msg
