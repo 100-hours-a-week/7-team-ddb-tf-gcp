@@ -1,8 +1,3 @@
-# Monitoring 외부 고정 IP
-resource "google_compute_address" "monitoring" {
-  name = "monitoring-ip-${var.env}"
-}
-
 resource "google_service_account" "monitoring" {
   account_id = "monitoring-sa"
 }
@@ -26,10 +21,6 @@ resource "google_compute_instance" "monitoring" {
     network    = var.network
     subnetwork = var.subnetwork
     network_ip = "10.30.10.3"
-
-    access_config {
-      nat_ip = google_compute_address.monitoring.address
-    }
   }
 
   service_account {
@@ -78,7 +69,7 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
     ports    = ["22"]
   }
 
-  source_tags   = ["jenkins"]
+  source_ranges = ["35.235.240.0/20"]  
   target_tags   = [local.mon_tag]
 }
 
@@ -126,6 +117,7 @@ resource "google_project_iam_member" "monitoring_sa" {
     storage_admin        = "roles/storage.admin"
     compute_viewer       = "roles/compute.viewer"
     sotrage_object_admin = "roles/storage.objectAdmin"
+    iap_tunnel_accessor    = "roles/iap.tunnelResourceAccessor"
   }
   project = var.project_id
   role    = each.value

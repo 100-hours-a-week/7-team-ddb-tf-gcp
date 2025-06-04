@@ -138,6 +138,20 @@ resource "google_compute_firewall" "ssh_from_shared_to_ai" {
   target_tags   = [local.ai_tag]
 }
 
+resource "google_compute_firewall" "iap_from_shared_to_ai" {
+  name      = "iap-from-shared-to-ai-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = [local.ai_tag]
+}
+
 # 로드밸런서에서 FastAPI 앱 포트로의 접근 허용
 resource "google_compute_firewall" "lb_to_ai" {
   name      = "lb-to-ai-${var.env}"
@@ -175,4 +189,12 @@ resource "google_compute_health_check" "ai" {
     port         = var.ai_port
     request_path = var.health_check_path
   }
+}
+
+resource "google_project_iam_member" "tunnel_resource_Accessor" {
+  project = var.project_id
+  role    = "roles/iap.tunnelResourceAccessor"
+  member  = "serviceAccount:${google_service_account.ai.email}"
+
+  depends_on = [google_service_account.ai]
 }
