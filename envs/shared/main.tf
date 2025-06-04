@@ -43,7 +43,7 @@ module "jenkins" {
   jenkins_service_name  = var.jenkins_service_name
   jenkins_port          = var.jenkins_port
   health_check_path     = var.health_check_path
-  mon_tag = module.monitoring.mon_tag
+  mon_tag               = module.monitoring.mon_tag
 }
 
 module "dns" {
@@ -82,4 +82,10 @@ module "monitoring" {
   ssh_users           = var.ssh_users
   project_id          = var.project_id
   service_name        = var.monitoring_service_name
+}
+
+module "nat_gateway" {
+  source        = "../../modules/nat_gateway"
+  env           = var.env
+  vpc_self_link = module.network.vpc_self_link
 }
