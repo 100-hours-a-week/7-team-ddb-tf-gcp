@@ -145,6 +145,20 @@ resource "google_compute_firewall" "ssh_from_shared_to_be" {
   target_tags   = [local.be_tag]
 }
 
+resource "google_compute_firewall" "iap_from_shared_to_be" {
+  name      = "iap-from-shared-to-be-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = [local.be_tag]
+}
+
 // be instance의 방화벽
 resource "google_compute_firewall" "lb_to_be" {
   name      = "lb-to-be-firewall-${var.env}"
@@ -197,4 +211,12 @@ resource "google_compute_health_check" "be_hc" {
     port         = var.be_port
     request_path = var.be_health_check_path
   }
+}
+
+resource "google_project_iam_member" "tunnel_resource_Accessor" {
+  project = var.project_id
+  role    = "roles/iap.tunnelResourceAccessor"
+  member  = "serviceAccount:${google_service_account.be.email}"
+
+  depends_on = [google_service_account.be]
 }
