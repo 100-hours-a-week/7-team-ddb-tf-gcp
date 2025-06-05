@@ -45,4 +45,4 @@ scrape_configs:
 
   - job_name: 'postgres-exporter-prod'
     static_configs:
-      - targets: ['postgres-exporter-prod:9188']
+      - targets: ['postgres-exporter-prod:9187']
