@@ -1,16 +1,12 @@
 variable "env" {
-  description = "envs (dev, prod)"
+  description = "envs"
   type        = string
 }
 
 variable "subnets" {
-  description = "subnet setting. key=name, value={ cidr}"
+  description = "Subnet 정의 (GKE용은 secondary_ranges 포함)"
   type = map(object({
-    cidr = string
+    cidr             = string
+    secondary_ranges = optional(map(string))  
   }))
-}
-
-variable "public_route_tag" {
-  description = "public route tags"
-  type = string
 }
