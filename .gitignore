@@ -37,5 +37,5 @@ override.tf.json
 terraform.rc
 *.pem
 account.json
-accoutk8s.json
+accountk8s.json
 *.zip
