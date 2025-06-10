@@ -72,7 +72,6 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
     options {
       logging = "CLOUD_LOGGING_ONLY"
     }
-    # 1) Git clone
     step {
       name       = "gcr.io/cloud-builders/git"
       entrypoint = "bash"
@@ -113,7 +112,12 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
       entrypoint = "sh"
       args = [
         "-c",
-        "cd repo/envs/$${_PATH} && terraform init"
+        <<-EOF
+        cd /workspace/repo/envs/$${_PATH} && terraform init
+        cd /workspace/dev/envs/dev && terraform init
+        cd /workspace/prod/envs/prod && terraform init
+        cd /workspace/dev/envs/shared && terraform init
+        EOF
       ]
     }
     # Backup on destroy
@@ -139,7 +143,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         EOF
       ]
     }
-    
+
     step {
       name       = "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
       entrypoint = "bash"
@@ -177,7 +181,7 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         <<-EOF
         set -e
         if [ "$${_ACTION}" = "apply" ]; then
-          cd /workspace/prod/envs/shared && terraform apply -auto-approve
+          cd /workspace/dev/envs/shared && terraform apply -auto-approve
         fi
         EOF
       ]
@@ -208,14 +212,11 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         if [ "$${_ACTION}" = "destroy" ]; then
           BOTH_DESTROYED=true
           cd /workspace/prod/envs/prod
-          terraform init -input=false
           PROD_COUNT=$$(terraform state list | wc -l)
           cd /workspace/dev/envs/dev
-          terraform init -input=false
           DEV_COUNT=$$(terraform state list | wc -l)
           if [ "$$PROD_COUNT" -eq 0 ] && [ "$$DEV_COUNT" -eq 0 ]; then
-            cd /workspace/prod/envs/shared
-            terraform init -input=false
+            cd /workspace/dev/envs/shared
             terraform destroy -auto-approve
           fi
         fi
@@ -288,11 +289,16 @@ resource "google_pubsub_topic_iam_binding" "build_sub" {
 # Build 계정에 프로젝트 권한 일괄 부여
 resource "google_project_iam_member" "build_sa" {
   for_each = {
-    editor          = "roles/editor"
-    log_writer      = "roles/logging.logWriter"
-    secret_accessor = "roles/secretmanager.admin"
-    storage_admin   = "roles/storage.admin"
-    cloudsql_admin  = "roles/cloudsql.admin"
+    editor               = "roles/editor"
+    log_writer           = "roles/logging.logWriter"
+    secret_accessor      = "roles/secretmanager.admin"
+    storage_admin        = "roles/storage.admin"
+    cloudsql_admin       = "roles/cloudsql.admin"
+    iap_tunnel           = "roles/iap.tunnelResourceAccessor"
+    os_login             = "roles/compute.osLogin"
+    compute_admin        = "roles/compute.admin"          # VM 관리
+    service_account_user = "roles/iam.serviceAccountUser" # SA 사용
+    project_viewer       = "roles/viewer"                 # 프로젝트 읽기
   }
 
   project = var.project_id

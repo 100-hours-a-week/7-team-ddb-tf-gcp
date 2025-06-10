@@ -54,3 +54,13 @@ variable "nat_ip_address" {
   description = "nat의 ip 주소"
   type = string
 }
+
+variable "project_id" {
+  description = "프로젝트 id"
+  type = string
+}
+
+variable "shared_nat_ip_address" {
+  description = "공유 vpc 의 nat ip 주소"
+  type = string
+}

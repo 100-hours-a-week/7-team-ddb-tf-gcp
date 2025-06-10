@@ -66,6 +66,18 @@ locals {
   be_tag = "be" 
 
   ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
+
+
+  dockercompose_content = file("${path.module}/files/docker-compose.yml")
+  promtail_content      = templatefile("${path.module}/files/promtail.yml", {
+    env = var.env
+  })
+
+  rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
+    name                  = "monitoring"
+    dockercompose_content = local.dockercompose_content
+    promtail_content      = local.promtail_content
+  })
 }
 
 // be instance 생성
@@ -107,7 +119,7 @@ resource "google_compute_instance" "be" {
     ENV_LABEL = var.env
   }
 
-  metadata_startup_script = file("${path.module}/scripts/startup.sh")
+  metadata_startup_script = local.rendered_startup_script
 
   depends_on = [
     google_service_account.be,
@@ -126,10 +138,24 @@ resource "google_compute_firewall" "ssh_from_shared_to_be" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["22", "9100", "8081"]
   }
 
   source_ranges = [var.shared_vpc_cidr]  
+  target_tags   = [local.be_tag]
+}
+
+resource "google_compute_firewall" "iap_from_shared_to_be" {
+  name      = "iap-from-shared-to-be-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
   target_tags   = [local.be_tag]
 }
 
@@ -185,4 +211,12 @@ resource "google_compute_health_check" "be_hc" {
     port         = var.be_port
     request_path = var.be_health_check_path
   }
+}
+
+resource "google_project_iam_member" "tunnel_resource_Accessor" {
+  project = var.project_id
+  role    = "roles/iap.tunnelResourceAccessor"
+  member  = "serviceAccount:${google_service_account.be.email}"
+
+  depends_on = [google_service_account.be]
 }

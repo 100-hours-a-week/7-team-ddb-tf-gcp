@@ -1,0 +1,181 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.4.0
+    container_name: prometheus
+    volumes:
+      - prometheus_data:/prometheus/data
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus/data"
+      - "--storage.tsdb.min-block-duration=30m"
+      - "--storage.tsdb.max-block-duration=30m"
+    restart: unless-stopped
+  
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+  
+  grafana:
+    image: grafana/grafana:12.0.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+  
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command:
+      - "-config.file=/etc/loki/local-config.yml"
+    volumes:
+      - loki_data:/wal
+      - ./loki.yml:/etc/loki/local-config.yml:ro
+    restart: unless-stopped
+  
+  thanos-sidecar:
+    image: thanosio/thanos:v0.38.0
+    container_name: thanos-sidecar
+    user: root
+    depends_on:
+      - prometheus
+    volumes:
+      - prometheus_data:/prometheus/data
+      - ./thanos-gcs.yml:/etc/thanos/gcs.yml:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=2g
+    command: >
+      sidecar
+      --prometheus.url=http://prometheus:9090
+      --tsdb.path=/prometheus/data
+      --objstore.config-file=/etc/thanos/gcs.yml
+      --grpc-address=0.0.0.0:19191
+      --http-address=0.0.0.0:19192
+      --log.level=info
+    ports:
+      - "19191:19191"
+      - "19192:19192"
+    restart: unless-stopped
+  
+  thanos-store:
+    image: thanosio/thanos:v0.38.0
+    container_name: thanos-store
+    depends_on:
+      - thanos-sidecar
+    volumes:
+      - ./thanos-gcs.yml:/etc/thanos/gcs.yml:ro
+      - thanos_store_data:/data
+    command: >
+      store
+      --objstore.config-file=/etc/thanos/gcs.yml
+      --grpc-address=0.0.0.0:19091
+      --http-address=0.0.0.0:19090
+      --log.level=info
+    ports:
+      - "19091:19091"
+      - "19090:19090"
+    restart: unless-stopped
+  
+  thanos-query:
+    image: thanosio/thanos:v0.38.0
+    container_name: thanos-query
+    depends_on:
+      - thanos-sidecar
+      - thanos-store
+    volumes:
+      - ./endpoints.yml:/etc/thanos/endpoints.yml:ro
+    command: >
+      query
+      --http-address=0.0.0.0:9091
+      --grpc-address=0.0.0.0:10901
+      --endpoint.sd-config-file=/etc/thanos/endpoints.yml
+      --log.level=info
+    ports:
+      - "9091:9091"
+      - "10901:10901"
+    restart: unless-stopped
+  cloudsql-proxy-dev:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.16.0
+    container_name: cloudsql-proxy-dev
+    command:
+      - "--address=0.0.0.0"
+      - "--port=5432"
+      - "velvety-calling-458402-c1:asia-northeast3:db-dev-primary"
+
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+  cloudsql-proxy-prod:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.16.0
+    container_name: cloudsql-proxy-prod
+    command:
+      - "--address=0.0.0.0"
+      - "--port=5433"
+      - "velvety-calling-458402-c1:asia-northeast3:db-prod-primary"
+    ports:
+      - "5433:5433"
+    restart: unless-stopped
+
+  postgres-exporter-dev:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter-dev
+    depends_on:
+      - cloudsql-proxy-dev
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://dolpinuser:"${DEV_DB_PW}"@cloudsql-proxy-dev:5432/dolpin?sslmode=disable
+    restart: unless-stopped
+  postgres-exporter-prod:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter-prod
+    depends_on:
+      - cloudsql-proxy-prod
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://dolpinuser:"${PROD_DB_PW}"@cloudsql-proxy-prod:5433/dolpin?sslmode=disable
+      
+volumes:
+  prometheus_data:
+    name: prometheus_data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/peter/monitoring/prometheus-data
+      o: bind
+  
+  grafana_data:
+    name: grafana_data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/peter/monitoring/grafana-data
+      o: bind
+  
+  loki_data:
+    name: loki_data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/peter/monitoring/loki-data
+      o: bind
+  
+  thanos_store_data:
+    name: thanos_store_data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/peter/monitoring/thanos-store-data
+      o: bind

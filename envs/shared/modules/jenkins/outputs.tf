@@ -1,3 +1,7 @@
+output "jenkins_public_key" {
+  description = "jenkins public key"
+  value       = data.tls_public_key.jenkins_ssh_pubkey.public_key_openssh
+}
 output "jenkins_group" {
   description = "SelfLink of BE instance group"
   value       = google_compute_instance_group.jenkins_group.self_link

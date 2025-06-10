@@ -8,7 +8,7 @@ terraform {
   }
   backend "gcs" {
     bucket      = "dolpin-terraform-state-29m1t350"
-    prefix     = "shared"
+    prefix      = "shared"
     credentials = "../../secrets/account.json"
   }
 }
@@ -43,6 +43,7 @@ module "jenkins" {
   jenkins_service_name  = var.jenkins_service_name
   jenkins_port          = var.jenkins_port
   health_check_path     = var.health_check_path
+  mon_tag               = module.monitoring.mon_tag
 }
 
 module "dns" {
@@ -60,5 +61,31 @@ module "dns" {
       health_check   = module.jenkins.health_check
       port_name      = var.jenkins_service_name
     }
+    (var.monitoring_service_name) : {
+      domain         = var.monitoring_domain
+      instance_group = module.monitoring.monitoring_group
+      health_check   = module.monitoring.health_check
+      port_name      = var.monitoring_service_name
+    }
   }
+}
+
+module "monitoring" {
+  source              = "./modules/monitoring"
+  machine_type        = var.monitoring_instance_type
+  instance_monitoring = var.instance_monitoring
+  zone                = var.zone
+  public_key          = module.jenkins.jenkins_public_key
+  env                 = var.env
+  network             = module.network.vpc_self_link
+  subnetwork          = module.network.subnet_self_links[var.public_service_name]
+  ssh_users           = var.ssh_users
+  project_id          = var.project_id
+  service_name        = var.monitoring_service_name
+}
+
+module "nat_gateway" {
+  source        = "../../modules/nat_gateway"
+  env           = var.env
+  vpc_self_link = module.network.vpc_self_link
 }

@@ -30,3 +30,23 @@ module "tf_automation" {
   envs_parameter     = var.envs_parameter
   backup_bucket_name = var.backup_bucket_name
 }
+
+module "loki_backup_bucket" {
+  source = "./modules/cloud_storage"
+  env = var.env
+  bucket_name = var.loki_backup_bucket_name
+  bucket_location = "asia-northeast3"
+}
+
+module "thanos_backup_bucket" {
+  source = "./modules/cloud_storage"
+  env = var.env
+  bucket_name = var.thanos_backup_bucket_name
+  bucket_location = "asia-northeast3"
+}
+  
+module "secret" {
+  source = "./modules/secret"
+  db_envs = var.db_envs
+  db_username = var.db_usernames
+}

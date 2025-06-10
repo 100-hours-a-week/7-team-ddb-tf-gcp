@@ -1,0 +1,48 @@
+global:
+  external_labels:
+    cluster: 'shared'
+  scrape_interval: 15s
+
+scrape_configs:
+  # Spring Boot - dev
+  - job_name: 'spring-boot-gce'
+    metrics_path: '/actuator/prometheus'
+    gce_sd_configs:
+      - project: velvety-calling-458402-c1
+        zone: asia-northeast3-a
+        port: 8081
+        filter: 'labels.component=be'
+    relabel_configs:
+      - action: replace
+        source_labels: [__meta_gce_instance_name]
+        target_label: application
+
+  - job_name: 'fastapi-gce'
+    metrics_path: '/metrics'
+    gce_sd_configs:
+      - project: velvety-calling-458402-c1
+        zone: asia-northeast3-a
+        port: 8000
+        filter: 'labels.component=ai'
+    relabel_configs:
+      - action: replace
+        source_labels: [__meta_gce_instance_name]
+        target_label: application
+        
+  - job_name: 'node-exporter-gce'
+    gce_sd_configs:
+      - project: velvety-calling-458402-c1
+        zone: asia-northeast3-a
+        port: 9100
+    relabel_configs:
+      - action: replace
+        source_labels: [__meta_gce_instance_name]
+        target_label: nodename
+
+  - job_name: 'postgres-exporter-dev'
+    static_configs:
+      - targets: ['postgres-exporter-dev:9187']
+
+  - job_name: 'postgres-exporter-prod'
+    static_configs:
+      - targets: ['postgres-exporter-prod:9187']

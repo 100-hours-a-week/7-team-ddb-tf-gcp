@@ -69,6 +69,12 @@ locals {
   fe_tag = "fe" 
 
   ssh_key_entries = [ for user in var.ssh_users : "${user}:${data.tls_public_key.jenkins_pubkey.public_key_openssh}" ]
+
+  dockercompose_content = file("${path.module}/files/docker-compose.yml")
+  rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
+    name                  = "monitoring"
+    dockercompose_content = local.dockercompose_content
+  })
 }
 
 # FE 인스턴스 생성
@@ -100,7 +106,7 @@ resource "google_compute_instance" "fe" {
     ENV_LABEL = var.env
   }
 
-  metadata_startup_script = file("${path.module}/scripts/startup.sh")
+  metadata_startup_script = local.rendered_startup_script
 
   tags = [local.fe_tag, var.private_route_tag]
 
@@ -128,10 +134,24 @@ resource "google_compute_firewall" "ssh_from_shared_to_fe" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["22", "9100"]
   }
 
   source_ranges = [var.shared_vpc_cidr]  
+  target_tags   = [local.fe_tag]
+}
+
+resource "google_compute_firewall" "iap_from_shared_to_fe" {
+  name      = "iap-from-shared-to-fe-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
   target_tags   = [local.fe_tag]
 }
 
@@ -172,4 +192,12 @@ resource "google_compute_health_check" "fe" {
     port         = var.fe_port
     request_path = var.health_check_path 
   }
+}
+
+resource "google_project_iam_member" "tunnel_resource_Accessor" {
+  project = var.project_id
+  role    = "roles/iap.tunnelResourceAccessor"
+  member  = "serviceAccount:${google_service_account.fe.email}"
+
+  depends_on = [google_service_account.fe]
 }

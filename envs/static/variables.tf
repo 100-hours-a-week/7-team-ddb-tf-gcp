@@ -30,17 +30,17 @@ variable "tf_automation_schedules" {
   description = "테라폼 자동화 스케줄"
   default = {
     apply = [
-      # main 브랜치: 평일 오전 9시 00분 시작
-      { branch = "main", schedule = "00 9 * * 1-5" },
+      # main 브랜치: 평일 오전 8시 30분 시작
+      { branch = "main", schedule = "30 8 * * 1-5" },
 
-      # dev 브랜치: 일~목 오후 12시 00분 시작
-      { branch = "dev", schedule = "00 12 * * 0-4" },
+      # dev 브랜치: 일~목 오전 11시 30분 시작
+      { branch = "dev", schedule = "30 11 * * 0-4" },
 
-      # dev 브랜치: 금요일 오전 8시 00분 시작
-      { branch = "dev", schedule = "00 8 * * 5" },
+      # dev 브랜치: 금요일 오전 7시 30분 시작
+      { branch = "dev", schedule = "30 7 * * 5" },
 
-      # dev 브랜치: 토요일 오후 12시 00분 시작
-      { branch = "dev", schedule = "00 12 * * 6" }
+      # dev 브랜치: 토요일 오전 11시 30분 시작
+      { branch = "dev", schedule = "30 11 * * 6" }
     ]
     destroy = [
       # main 브랜치: 평일(월~금) 오후 8시에 종료
@@ -105,3 +105,26 @@ variable "backup_bucket_name" {
   description = "백업에 사용할 버킷 이름"
   default     = "static-backup-bucket"
 }
+
+variable "loki_backup_bucket_name" {
+  type = string
+  description = "로키 데이터 백업 버킷"
+  default = "loki-dolpin"
+}
+
+variable "thanos_backup_bucket_name" {
+  type = string
+  description = "로키 데이터 백업 버킷"
+  default = "thanos-dolpin"
+}
+
+variable "db_envs" {
+  type    = set(string)
+  default = ["dev", "prod"]
+}
+
+variable "db_usernames" {
+  type        = string
+  default = "dolpinuser"
+}
+

@@ -32,11 +32,13 @@ locals {
   ]
 
   jenkins_dockerfile_content = file("${path.module}/scripts/Dockerfile.jenkins")
+  dockercompose_content      = file("${path.module}/files/docker-compose.yml")
 
   rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {
     name                     = "jenkins"
     jenkins_priv_key_b64  = base64encode(tls_private_key.jenkins_ssh.private_key_pem)
     dockerfile_content       = local.jenkins_dockerfile_content
+    dockercompose_content = local.dockercompose_content
   })
 }
 
@@ -74,11 +76,6 @@ resource "google_storage_bucket_iam_member" "jenkins_gcs_object_admin" {
   depends_on = [google_service_account.jenkins]
 }
 
-# Jenkins 외부 고정 IP
-resource "google_compute_address" "jenkins" {
-  name = "jenkins-ip-${var.env}"
-}
-
 # Jenkins 인스턴스
 resource "google_compute_instance" "jenkins" {
   name         = var.jenkins_instance_name
@@ -96,10 +93,6 @@ resource "google_compute_instance" "jenkins" {
     network    = var.network
     subnetwork = var.subnetwork
     network_ip = "10.30.10.2"
-
-    access_config {
-      nat_ip = google_compute_address.jenkins.address
-    }
   }
 
   service_account {
@@ -130,9 +123,22 @@ resource "google_compute_firewall" "jenkins" {
 
   target_tags   = ["jenkins"]
   direction     = "INGRESS"
-  source_ranges = var.allowed_ssh_cidrs
+  source_ranges = ["35.235.240.0/20"]
 }
+  
+resource "google_compute_firewall" "jenkins_to_monitoring" {
+  name      = "jenkins-to-monitoring-${var.env}"
+  network   = var.network
+  direction = "INGRESS"
 
+  allow {
+    protocol = "tcp"
+    ports    = ["9100"]
+  }
+
+  source_tags = [var.mon_tag]
+  target_tags = ["jenkins"]
+}
 resource "google_compute_firewall" "lb_to_jenkins" {
   name    = "allow-lb-to-jenkins"
   network = var.network
@@ -169,4 +175,12 @@ resource "google_compute_health_check" "health_check" {
     port         = var.jenkins_port
     request_path = var.health_check_path 
   }
+}
+
+resource "google_project_iam_member" "jenkins_tunnel_resource_Accessor" {
+  project = var.project_id
+  role    = "roles/iap.tunnelResourceAccessor"
+  member  = "serviceAccount:${google_service_account.jenkins.email}"
+
+  depends_on = [google_service_account.jenkins]
 }
