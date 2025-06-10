@@ -33,3 +33,41 @@ module "network" {
     }
   }
 }
+
+module "cloudsql" {
+  source              = "../../modules/cloud_sql"
+  env                 = var.env
+  component           = var.component
+  tier                = var.tier
+  resource_type       = var.resource_type
+  deletion_protection = var.deletion_protection
+  db_name             = var.db_name
+  db_user             = var.db_user
+  nat_ip_address      = module.nat_gateway.nat_ip
+}
+
+module "cloud_storage" {
+  source = "../../modules/cloud_storage"
+
+  env                           = var.env
+  bucket_name                   = var.bucket_name
+  location                      = var.location
+  force_destroy                 = true
+  cors_origins                  = [var.cors_origin]
+  backend_service_account_email = var.be_service_account_email
+}
+
+module "nat_gateway" {
+  source        = "../../modules/nat_gateway"  
+  env           = var.env
+  vpc_self_link = module.network.vpc_self_link
+}
+
+module "gar" {
+  source           = "../../modules/gar"
+  location         = var.location
+  env              = var.env
+  format           = var.gar_format
+  immutable_tags   = var.immutable_tags
+  cleanup_policies = var.cleanup_policies
+}
