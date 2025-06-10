@@ -2,7 +2,7 @@ resource "random_password" "db_password" {
   for_each          = var.db_envs
   length            = 16
   special           = true
-  override_special  = "!@#%^&*()-_+[]{}<>?"
+  override_special  = "$*-_="
 }
 
 resource "google_secret_manager_secret" "cloudsql_password" {

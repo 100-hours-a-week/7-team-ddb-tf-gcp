@@ -7,6 +7,7 @@ locals {
 
   dockercompose_content = templatefile("${path.module}/files/docker-compose.yml", {
     DEV_DB_PW  = data.google_secret_manager_secret_version.dev_db_password.secret_data
+    PROD_DB_PW  = data.google_secret_manager_secret_version.prod_db_password.secret_data
   })
 
   rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {

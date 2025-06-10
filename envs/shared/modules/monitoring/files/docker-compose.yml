@@ -135,9 +135,18 @@ services:
     ports:
       - "9187:9187"
     environment:
-      - DATA_SOURCE_NAME=postgresql://dolpinuser:%23VfOvcSS60YH%29OU7@cloudsql-proxy-dev:5432/dolpin?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://dolpinuser:"${DEV_DB_PW}"@cloudsql-proxy-dev:5432/dolpin?sslmode=disable
     restart: unless-stopped
-
+  postgres-exporter-prod:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter-prod
+    depends_on:
+      - cloudsql-proxy-prod
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://dolpinuser:"${PROD_DB_PW}"@cloudsql-proxy-prod:5433/dolpin?sslmode=disable
+      
 volumes:
   prometheus_data:
     name: prometheus_data
