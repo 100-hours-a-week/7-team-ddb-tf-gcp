@@ -47,7 +47,7 @@ module "cloudsql" {
 }
 
 module "cloud_storage" {
-  source = "./modules/cloud_storage"
+  source = "../../modules/cloud_storage"
 
   env                           = var.env
   bucket_name                   = var.bucket_name
@@ -58,13 +58,13 @@ module "cloud_storage" {
 }
 
 module "nat_gateway" {
-  source        = "./modules/nat_gateway"  
+  source        = "../../modules/nat_gateway"  
   env           = var.env
   vpc_self_link = module.network.vpc_self_link
 }
 
 module "gar" {
-  source           = "./modules/gar"
+  source           = "../../modules/gar"
   location         = var.location
   env              = var.env
   format           = var.gar_format
