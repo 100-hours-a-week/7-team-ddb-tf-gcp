@@ -10,12 +10,13 @@ resource "google_compute_subnetwork" "subnets" {
   ip_cidr_range            = each.value.cidr
   network                  = google_compute_network.vpc.id
   private_ip_google_access = false
+}
 
-  dynamic "secondary_ip_range" {
-    for_each = lookup(each.value, "secondary_ranges", {})
-    content {
-      range_name    = secondary_ip_range.key
-      ip_cidr_range = secondary_ip_range.value
-    }
-  }
+resource "google_compute_route" "public_route" {
+  name             = "public-route-${var.env}"
+  network          = google_compute_network.vpc.id
+  dest_range       = "0.0.0.0/0"
+  next_hop_gateway = "default-internet-gateway"
+  priority         = 1000
+  tags             = [var.public_route_tag]
 }
