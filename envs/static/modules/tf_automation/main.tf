@@ -305,3 +305,54 @@ resource "google_project_iam_member" "build_sa" {
   role    = each.value
   member  = "serviceAccount:${google_service_account.build_sa.email}"
 }
+
+resource "google_storage_bucket" "tf_notifier_bucket" {
+  name                        = "tf_notifier-${var.env}"
+  location                    = var.bucket_location
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+data "archive_file" "function" {
+  type        = "zip"
+  source_dir  = "${path.module}/functions"
+  output_path = "${path.module}/function.zip"
+}
+
+# 3. ZIP 파일을 GCS에 업로드
+resource "google_storage_bucket_object" "notifier_zip" {
+  name   = "notifier.zip"
+  bucket = google_storage_bucket.tf_notifier_bucket.name
+  source = data.archive_file.function.output_path
+}
+
+data "google_secret_manager_secret_version" "discord_webhook" {
+  secret  = "discord-webhook-url"
+  version = "latest"
+}
+
+resource "google_cloudfunctions_function" "tf_notifier" {
+  name                  = "tf-notifier"
+  runtime               = "python310"
+  entry_point           = "main"
+  source_archive_bucket = google_storage_bucket.tf_notifier_bucket.name
+  source_archive_object = google_storage_bucket_object.notifier_zip.name
+  available_memory_mb   = 128
+  timeout               = 60
+
+  environment_variables = {
+    DISCORD_WEBHOOK_URL =data.google_secret_manager_secret_version.discord_webhook.secret_data
+  }
+  event_trigger {
+    event_type = "google.pubsub.topic.publish"
+    resource   = "projects/${var.project_id}/topics/cloud-builds"
+  }
+}
+
+resource "google_cloudfunctions_function_iam_member" "invoker" {
+  project        = google_cloudfunctions_function.tf_notifier.project
+  region         = google_cloudfunctions_function.tf_notifier.region
+  cloud_function = google_cloudfunctions_function.tf_notifier.name
+  role           = "roles/cloudfunctions.invoker"
+  member         = "allUsers"
+}
