@@ -56,7 +56,8 @@ sudo docker run --rm -v jenkins_home:/data busybox true
 
 JENKINS_HOME="/var/lib/docker/volumes/jenkins_home/_data"
 
-LATEST_BACKUP=$(gsutil ls gs://backup-dolpin-dev/jenkins-backups/ | sort | tail -n 1)
+LATEST_BACKUP=$(gsutil ls -l gs://backup-dolpin-dev/jenkins-backups/ | \
+  grep -v TOTAL | sort -k2,3 | tail -n 1 | awk '{print $NF}')
 
 touch /tmp/restore.lock
 
