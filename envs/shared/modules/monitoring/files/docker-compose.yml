@@ -143,7 +143,7 @@ services:
     depends_on:
       - cloudsql-proxy-prod
     ports:
-      - "9187:9187"
+      - "9188:9187"
     environment:
       - DATA_SOURCE_NAME=postgresql://dolpinuser:"${PROD_DB_PW}"@cloudsql-proxy-prod:5433/dolpin?sslmode=disable
       

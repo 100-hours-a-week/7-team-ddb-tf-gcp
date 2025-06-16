@@ -176,6 +176,13 @@ module "vpc_peering_shared_to_env" {
   import_custom_routes = var.import_custom_routes
 }
 
+resource "null_resource" "wait_after_shared_peering" {
+  provisioner "local-exec" {
+    command = "sleep 30"
+  }
+  depends_on = [module.vpc_peering_shared_to_env]
+}
+
 module "vpc_peering_env_to_shared" {
   source               = "../../modules/vpc_peering"
   name_prefix          = var.env
@@ -188,4 +195,5 @@ module "vpc_peering_env_to_shared" {
   create_firewall      = var.create_firewall
   export_custom_routes = var.export_custom_routes
   import_custom_routes = var.import_custom_routes
+  depends_on = [null_resource.wait_after_shared_peering]
 }
