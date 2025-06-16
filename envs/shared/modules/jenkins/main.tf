@@ -67,13 +67,30 @@ resource "google_project_iam_member" "jenkins_artifact_registry_writer" {
   depends_on = [google_service_account.jenkins]
 }
 
-# GCS 버킷에 objectAdmin 권한 부여
+# GCS 버킷에 대한 objectAdmin 권한 부여
 resource "google_storage_bucket_iam_member" "jenkins_gcs_object_admin" {
   bucket = "static-backup-bucket"
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.jenkins.email}"
 
   depends_on = [google_service_account.jenkins]
+}
+
+resource "google_service_account_key" "jenkins_key" {
+  service_account_id = google_service_account.jenkins.name
+  private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+}
+
+resource "google_secret_manager_secret" "jenkins_sa_key_secret" {
+  secret_id = "jenkins-sa-key-${var.env}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "jenkins_sa_key_version" {
+  secret      = google_secret_manager_secret.jenkins_sa_key_secret.id
+  secret_data_wo = base64decode(google_service_account_key.jenkins_key.private_key)
 }
 
 # Jenkins 인스턴스
