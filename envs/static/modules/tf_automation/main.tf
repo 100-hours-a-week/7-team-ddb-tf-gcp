@@ -166,7 +166,9 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
           -U "$${_DBUSER}" \
           -d "$${_DBNAME}" \
           -c "REVOKE CONNECT ON DATABASE $${_DBNAME} FROM public;
-              SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$${_DBNAME}' AND pid <> pg_backend_pid();"
+              REVOKE CONNECT ON DATABASE $${_DBNAME} FROM $${_DBUSER};
+              SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$${_DBNAME}' AND pid <> pg_backend_pid();
+              ALTER ROLE $${_DBUSER} NOLOGIN;"
           kill $!
         fi
         EOF
@@ -231,15 +233,6 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         <<-EOF
         set -e
         if [ "$${_ACTION}" = "apply" ]; then
-          # Latest DB dump
-          LATEST_DB_URI=$$( \
-            gsutil ls "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/db/db_backup_*.sql" \
-              | sort | tail -n1 \
-          )
-          gcloud sql import sql $${_DBINSTANCE} \
-            "$$LATEST_DB_URI" \
-            --database=$${_DBNAME} --quiet
-
           # Latest storage backup
           LATEST_STORAGE_PREFIX=$$( \
             gsutil ls -d "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/storage/*/" \
@@ -248,6 +241,14 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
             gsutil -m rsync -r \
             "$$LATEST_STORAGE_PREFIX" \
             "gs://$${_CLOUDSTORAGE}/"
+          # Latest DB dump
+          LATEST_DB_URI=$$( \
+            gsutil ls "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/db/db_backup_*.sql" \
+              | sort | tail -n1 \
+          )
+          gcloud sql import sql $${_DBINSTANCE} \
+            "$$LATEST_DB_URI" \
+            --database=$${_DBNAME} --quiet
         fi
         EOF
       ]
