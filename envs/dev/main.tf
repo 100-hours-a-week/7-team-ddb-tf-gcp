@@ -9,7 +9,7 @@ terraform {
   backend "gcs" {
     bucket      = "dolpin-terraform-state-30m1t350"
     prefix      = "dev"
-    credentials = "../../secrets/account2nd.json"
+    credentials = "../../secrets/account.json"
   }
 }
 

@@ -7,7 +7,7 @@ variable "region" {
 variable "credentials_file" {
   type        = string
   description = "Path to the GCP credentials JSON file"
-  default     = "../../secrets/account2nd.json"
+  default     = "../../secrets/account.json"
 }
 
 variable "project_id" {

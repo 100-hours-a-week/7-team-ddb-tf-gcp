@@ -37,5 +37,4 @@ override.tf.json
 terraform.rc
 *.pem
 account.json
-account2nd.json
 *.zip
