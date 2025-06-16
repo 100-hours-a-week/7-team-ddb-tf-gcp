@@ -7,9 +7,9 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket      = "dolpin-terraform-state-29m1t350"
+    bucket      = "dolpin-terraform-state-30m1t350"
     prefix      = "dev"
-    credentials = "../../secrets/account.json"
+    credentials = "../../secrets/account2nd.json"
   }
 }
 
@@ -157,7 +157,7 @@ module "gar" {
 data "terraform_remote_state" "shared" {
   backend = "gcs"
   config = {
-    bucket = "dolpin-terraform-state-29m1t350"
+    bucket = "dolpin-terraform-state-30m1t350"
     prefix = "shared"
   }
 }

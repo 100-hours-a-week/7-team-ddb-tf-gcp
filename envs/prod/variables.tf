@@ -7,13 +7,13 @@ variable "region" {
 variable "credentials_file" {
   type        = string
   description = "Path to the GCP credentials JSON file"
-  default     = "../../secrets/account.json"
+  default     = "../../secrets/account2nd.json"
 }
 
 variable "project_id" {
   type        = string
   description = "GCP Project ID"
-  default     = "velvety-calling-458402-c1"
+  default     = "dolpin-2nd"
 }
 
 variable "env" {
@@ -238,9 +238,9 @@ variable "fe_health_check_path" {
 }
 
 variable "backup_bucket_name" {
-  type = string
+  type        = string
   description = "백업할 bucket 이름"
-  default = "static-backup-bucket"
+  default     = "static-backup-bucket"
 }
 
 // vpc peering

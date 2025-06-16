@@ -69,7 +69,7 @@ resource "google_project_iam_member" "jenkins_artifact_registry_writer" {
 
 # GCS 버킷에 objectAdmin 권한 부여
 resource "google_storage_bucket_iam_member" "jenkins_gcs_object_admin" {
-  bucket = "backup-dolpin-dev"
+  bucket = "static-backup-bucket"
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.jenkins.email}"
 
@@ -139,6 +139,7 @@ resource "google_compute_firewall" "jenkins_to_monitoring" {
   source_tags = [var.mon_tag]
   target_tags = ["jenkins"]
 }
+
 resource "google_compute_firewall" "lb_to_jenkins" {
   name    = "allow-lb-to-jenkins"
   network = var.network

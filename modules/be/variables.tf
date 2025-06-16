@@ -60,5 +60,5 @@ variable "shared_vpc_cidr" {
 variable "project_id" {
   description = "GCP 프로젝트 ID"
   type        = string
-  default     = "velvety-calling-458402-c1"
+  default     = "dolpin-2nd"
 }
