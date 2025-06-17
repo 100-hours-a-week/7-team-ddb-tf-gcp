@@ -33,7 +33,7 @@ variable "subnetwork" {
 variable "project_id" {
   type        = string
   description = "GCP Project ID"
-  default     = "velvety-calling-458402-c1"
+  default     = "dolpin-2nd"
 }
 
 variable "ssh_users" {
@@ -61,6 +61,7 @@ variable "health_check_path" {
   description = "헬스체크를 위한 요청 경로"
   type        = string
 }
+
 variable "mon_tag" {
   description = "모니터링 태그"
   type = string

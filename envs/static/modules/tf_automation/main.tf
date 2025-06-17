@@ -166,7 +166,9 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
           -U "$${_DBUSER}" \
           -d "$${_DBNAME}" \
           -c "REVOKE CONNECT ON DATABASE $${_DBNAME} FROM public;
-              SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$${_DBNAME}' AND pid <> pg_backend_pid();"
+              REVOKE CONNECT ON DATABASE $${_DBNAME} FROM $${_DBUSER};
+              SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$${_DBNAME}' AND pid <> pg_backend_pid();
+              ALTER ROLE $${_DBUSER} NOLOGIN;"
           kill $!
         fi
         EOF
@@ -231,15 +233,6 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
         <<-EOF
         set -e
         if [ "$${_ACTION}" = "apply" ]; then
-          # Latest DB dump
-          LATEST_DB_URI=$$( \
-            gsutil ls "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/db/db_backup_*.sql" \
-              | sort | tail -n1 \
-          )
-          gcloud sql import sql $${_DBINSTANCE} \
-            "$$LATEST_DB_URI" \
-            --database=$${_DBNAME} --quiet
-
           # Latest storage backup
           LATEST_STORAGE_PREFIX=$$( \
             gsutil ls -d "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/storage/*/" \
@@ -248,6 +241,14 @@ resource "google_cloudbuild_trigger" "tf_build_trigger" {
             gsutil -m rsync -r \
             "$$LATEST_STORAGE_PREFIX" \
             "gs://$${_CLOUDSTORAGE}/"
+          # Latest DB dump
+          LATEST_DB_URI=$$( \
+            gsutil ls "gs://${google_storage_bucket.backup_bucket.name}/$${_PATH}/db/db_backup_*.sql" \
+              | sort | tail -n1 \
+          )
+          gcloud sql import sql $${_DBINSTANCE} \
+            "$$LATEST_DB_URI" \
+            --database=$${_DBNAME} --quiet
         fi
         EOF
       ]
@@ -304,4 +305,55 @@ resource "google_project_iam_member" "build_sa" {
   project = var.project_id
   role    = each.value
   member  = "serviceAccount:${google_service_account.build_sa.email}"
+}
+
+resource "google_storage_bucket" "tf_notifier_bucket" {
+  name                        = "tf_notifier-${var.env}"
+  location                    = var.bucket_location
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+data "archive_file" "function" {
+  type        = "zip"
+  source_dir  = "${path.module}/functions"
+  output_path = "${path.module}/function.zip"
+}
+
+# 3. ZIP 파일을 GCS에 업로드
+resource "google_storage_bucket_object" "notifier_zip" {
+  name   = "notifier.zip"
+  bucket = google_storage_bucket.tf_notifier_bucket.name
+  source = data.archive_file.function.output_path
+}
+
+data "google_secret_manager_secret_version" "discord_webhook" {
+  secret  = "discord-webhook-url"
+  version = "latest"
+}
+
+resource "google_cloudfunctions_function" "tf_notifier" {
+  name                  = "tf-notifier"
+  runtime               = "python310"
+  entry_point           = "main"
+  source_archive_bucket = google_storage_bucket.tf_notifier_bucket.name
+  source_archive_object = google_storage_bucket_object.notifier_zip.name
+  available_memory_mb   = 128
+  timeout               = 60
+
+  environment_variables = {
+    DISCORD_WEBHOOK_URL =data.google_secret_manager_secret_version.discord_webhook.secret_data
+  }
+  event_trigger {
+    event_type = "google.pubsub.topic.publish"
+    resource   = "projects/${var.project_id}/topics/cloud-builds"
+  }
+}
+
+resource "google_cloudfunctions_function_iam_member" "invoker" {
+  project        = google_cloudfunctions_function.tf_notifier.project
+  region         = google_cloudfunctions_function.tf_notifier.region
+  cloud_function = google_cloudfunctions_function.tf_notifier.name
+  role           = "roles/cloudfunctions.invoker"
+  member         = "allUsers"
 }

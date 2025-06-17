@@ -1,6 +1,5 @@
 locals {
   mon_tag            = "mon"
-  prometheus_content = file("${path.module}/files/prometheus.yml")
   loki_content       = file("${path.module}/files/loki.yml")
   thanosgcs_content  = file("${path.module}/files/thanos-gcs.yml")
   endpoints_content  = file("${path.module}/files/endpoints.yml")
@@ -8,6 +7,10 @@ locals {
   dockercompose_content = templatefile("${path.module}/files/docker-compose.yml", {
     DEV_DB_PW  = data.google_secret_manager_secret_version.dev_db_password.secret_data
     PROD_DB_PW  = data.google_secret_manager_secret_version.prod_db_password.secret_data
+  })
+  
+  prometheus_content = templatefile("${path.module}/files/prometheus.yml", {
+    PROJECT_ID  = var.project_id
   })
 
   rendered_startup_script = templatefile("${path.module}/scripts/startup.sh", {

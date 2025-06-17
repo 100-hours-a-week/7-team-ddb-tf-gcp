@@ -7,7 +7,7 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket      = "dolpin-terraform-state-29m1t350"
+    bucket      = "dolpin-terraform-state-30m1t350"
     prefix      = "shared"
     credentials = "../../secrets/account.json"
   }

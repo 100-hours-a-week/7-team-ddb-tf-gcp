@@ -13,7 +13,7 @@ variable "credentials_file" {
 variable "project_id" {
   type        = string
   description = "GCP Project ID"
-  default     = "velvety-calling-458402-c1"
+  default     = "dolpin-2nd"
 }
 
 variable "env" {
