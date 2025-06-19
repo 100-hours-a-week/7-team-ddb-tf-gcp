@@ -31,6 +31,10 @@ module "network" {
         services = var.gke_services_range
       }
     }
+
+    jenkins = {
+      cidr = var.jenkins_cidr
+    }
   }
 }
 
@@ -70,4 +74,16 @@ module "gar" {
   format           = var.gar_format
   immutable_tags   = var.immutable_tags
   cleanup_policies = var.cleanup_policies
+}
+
+module "jenkins" {
+  source                  = "./modules/jenkins"
+
+  env                     = var.env
+  project_id              = var.project_id
+  jenkins_instance_name   = "jenkins"
+  zone                    = var.zone
+  network                 = module.network.vpc_self_link
+  subnetwork              = module.network.subnet_self_links["jenkins"]
+  machine_type            = var.jenkins_instance_type
 }

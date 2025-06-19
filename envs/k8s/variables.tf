@@ -40,6 +40,11 @@ variable "gke_services_range" {
   default     = "10.24.0.0/20"
 }
 
+variable "jenkins_cidr" {
+  type    = string
+  default = "10.30.10.0/24"
+}
+
 variable "db_name" {
   description = "Cloud SQL DB 이름"
   type        = string
@@ -134,4 +139,16 @@ variable "cleanup_policies" {
       }
     }
   ]
+}
+
+variable "zone" {
+  type        = string
+  description = "jenkins 위치할 zone"
+  default     = "asia-northeast3-a"
+}
+
+variable "jenkins_instance_type" {
+  type        = string
+  description = "jenkins instance 종류"
+  default     = "n1-standard-1"
 }

@@ -35,18 +35,3 @@ variable "project_id" {
   description = "GCP Project ID"
   default     = "cryptic-bolt-460214-n3"
 }
-
-variable "jenkins_port" {
-  description = "Jenkins 애플리케이션이 수신할 포트 번호 (예: 8000)"
-  type        = number
-}
-
-variable "jenkins_service_name" {
-  description = "인스턴스 그룹의 named port 이름 (예: http)"
-  type        = string
-}
-
-variable "health_check_path" {
-  description = "헬스체크를 위한 요청 경로"
-  type        = string
-}

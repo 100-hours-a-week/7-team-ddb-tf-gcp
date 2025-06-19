@@ -12,7 +12,7 @@ resource "google_compute_subnetwork" "subnets" {
   private_ip_google_access = false
 
   dynamic "secondary_ip_range" {
-    for_each = lookup(each.value, "secondary_ranges", {})
+    for_each = try(each.value.secondary_ranges, {})
     content {
       range_name    = secondary_ip_range.key
       ip_cidr_range = secondary_ip_range.value

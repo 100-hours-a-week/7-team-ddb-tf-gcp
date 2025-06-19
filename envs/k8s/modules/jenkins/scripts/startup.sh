@@ -69,5 +69,4 @@ done
 echo "${dockerfile_content}" > /tmp/Dockerfile
 echo "${dockercompose_content}" > /tmp/docker-compose.yml
 cd /tmp
-export DOCKER_GID=$(getent group docker | cut -d: -f3)
-DOCKER_GID="$DOCKER_GID" docker compose up -d
+sudo docker compose up -d

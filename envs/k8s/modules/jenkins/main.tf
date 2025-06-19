@@ -77,40 +77,15 @@ resource "google_compute_instance" "jenkins" {
   depends_on = [google_service_account.jenkins]
 }
 
-resource "google_compute_firewall" "lb_to_jenkins" {
-  name    = "allow-lb-to-jenkins"
+resource "google_compute_firewall" "allow_ssh_iap" {
+  name    = "allow-ssh-from-iap"
   network = var.network
 
-  direction = "INGRESS"
   allow {
     protocol = "tcp"
-    ports    = ["9090"]
+    ports    = ["22"]
   }
 
-  source_ranges = [
-    "35.191.0.0/16",   
-    "130.211.0.0/22"
-  ]
-
-  target_tags = ["jenkins"]
-}
-
-resource "google_compute_instance_group" "jenkins_group" {
-  name      = "jenkins-group"
-  zone      = var.zone
-  instances = [google_compute_instance.jenkins.self_link]
-
-  named_port {
-    name = var.jenkins_service_name
-    port = var.jenkins_port
-  }
-}
-
-resource "google_compute_health_check" "health_check" {
-  name = "jenkins-health-check"
-
-  http_health_check {
-    port         = var.jenkins_port
-    request_path = var.health_check_path 
-  }
+  source_ranges = ["35.235.240.0/20"]  # IAP가 사용하는 IP 범위
+  target_tags   = [local.jenkins_tag]
 }
