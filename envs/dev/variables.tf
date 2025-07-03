@@ -73,7 +73,7 @@ variable "private_tag" {
 variable "dns_zone_name" {
   type        = string
   description = "dns managed zone 이름"
-  default     = "dolpin"
+  default     = "boamoa"
 }
 
 //be 변수
@@ -86,7 +86,7 @@ variable "be_service_name" {
 variable "be_domain" {
   type        = string
   description = "backend domain name"
-  default     = "be.dev.dolpin.site"
+  default     = "be.dev.boamoa.shop"
 }
 
 variable "be_zone" {
@@ -149,19 +149,19 @@ variable "bucket_service_name" {
 variable "bucket_domain" {
   type        = string
   description = "bucket domain"
-  default     = "cdn.dev.dolpin.site"
+  default     = "cdn.dev.boamoa.shop"
 }
 variable "cors_origin" {
   type        = string
   description = "cors_origin"
-  default     = "https://fe.dev.dolpin.site"
+  default     = "https://fe.dev.boamoa.shop"
 }
 
 // ai
 variable "ai_domain" {
   type        = string
   description = "backend domain name"
-  default     = "ai.dev.dolpin.site"
+  default     = "ai.dev.boamoa.shop"
 }
 variable "ai_zone" {
   type        = string
@@ -209,7 +209,7 @@ variable "fe_service_name" {
 variable "fe_domain" {
   type        = string
   description = "backend domain name"
-  default     = "fe.dev.dolpin.site"
+  default     = "fe.dev.boamoa.shop"
 }
 
 variable "fe_zone" {

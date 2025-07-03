@@ -32,7 +32,7 @@ resource "google_secret_manager_secret_iam_member" "ai_key_secret_access" {
 
 # Secret Manager에서 jenkins 공개키 조회 권한 부여
 resource "google_secret_manager_secret_iam_member" "ai_secret_access_to_jenkins_key" {
-  secret_id = "projects/${var.project_id}/secrets/jenkins-ssh-key-shared"
+  secret_id = "projects/${var.project_id}/secrets/ssh-key"
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.ai.email}"
 
@@ -50,7 +50,7 @@ resource "google_project_iam_member" "ai_artifact_registry_reader" {
 
 # Jenkins 공개키를 AI가 사용하기 위한 설정
 data "google_secret_manager_secret_version" "jenkins_pubkey" {
-  secret     = "jenkins-ssh-key-shared"
+  secret     = "ssh-key"
   version    = "latest"
   depends_on = [google_secret_manager_secret_iam_member.ai_secret_access_to_jenkins_key]
 }
